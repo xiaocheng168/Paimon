@@ -15,11 +15,11 @@ fun loadPlugin(paimon: Paimon) {
     val entries =
         JarFile(paimon.cl.getResource("plugin.yml")!!.file.replace("file:/", "").replace("!/plugin.yml", "")).entries()
 
-    for (entry in entries) {
-        if (!entry.isDirectory) {
+    entries.iterator().forEach {
+        if (!it.isDirectory) {
             //结尾必须是class
-            if (entry.name.endsWith(".class") && entry.name.startsWith(Class.forName(paimon.description.main).`package`.name)) {
-                val classes = entry.name.replace("/", ".").substring(0, entry.name.length - 6)
+            if (it.name.endsWith(".class") && it.name.startsWith(Class.forName(paimon.description.main).`package`.name)) {
+                val classes = it.name.replace("/", ".").substring(0, it.name.length - 6)
                 //加载该类
                 paimon.cl.loadClass(classes)
             }
@@ -36,12 +36,12 @@ fun loadPlugin(paimon: Paimon) {
     val paimonPluginClass = classes.filter { it.toString().contains(pluginPacket) }
 
     //遍历加载列表
-    for (clazz in paimonPluginClass.iterator()) {
+    paimonPluginClass.iterator().forEach {
         //如果这个类不是接口
-        if (!clazz.isInterface) {
+        if (!it.isInterface) {
             //判断这个类是否存在 PaimonListener
-            if (clazz.interfaces.contains(PaimonAutoListener::class.java)) {
-                Bukkit.getPluginManager().registerEvents(clazz.newInstance() as Listener, paimon)
+            if (it.interfaces.contains(PaimonAutoListener::class.java)) {
+                Bukkit.getPluginManager().registerEvents(it.newInstance() as Listener, paimon)
             }
         }
     }
