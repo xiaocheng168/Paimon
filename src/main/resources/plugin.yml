@@ -1,0 +1,5 @@
+name: PaimonDemo
+version: 1.0.0
+main: demo.TestPlugin
+description: Paimon demo
+author: Zcc
