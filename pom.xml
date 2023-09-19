@@ -91,7 +91,9 @@
         <dependency>
             <groupId>org.spigotmc</groupId>
             <artifactId>spigot-api</artifactId>
-            <version>1.20.1-R0.1-SNAPSHOT</version>
+            <version>1.12.2-R0.1-SNAPSHOT</version>
+            <systemPath>${project.basedir}/lib/Spigot.1.12.2.jar</systemPath>
+            <scope>system</scope>
         </dependency>
     </dependencies>
 
