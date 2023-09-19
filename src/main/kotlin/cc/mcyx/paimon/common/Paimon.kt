@@ -13,5 +13,6 @@ open class Paimon : JavaPlugin() {
         this.onEnabled()
     }
 
+
     open fun onEnabled() {}
 }
