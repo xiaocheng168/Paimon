@@ -8,6 +8,9 @@ import org.bukkit.command.CommandSender
 
 /**
  * 命令批处理类
+ * @param paimon 插件主体
+ * @param command 命令头
+ * @param permissionNode 权限节点
  */
 open class PaimonCommand(val paimon: Paimon, val command: String, val permissionNode: String = "") : Command(command) {
 
@@ -16,7 +19,7 @@ open class PaimonCommand(val paimon: Paimon, val command: String, val permission
     }
 
     //子命令
-    private val subCommand: HashMap<String, PaimonCommand> = LinkedHashMap()
+    val subCommand: HashMap<String, PaimonCommand> = LinkedHashMap()
 
 
     final override fun execute(p0: CommandSender, p1: String, p2: Array<out String>): Boolean {
@@ -41,7 +44,7 @@ open class PaimonCommand(val paimon: Paimon, val command: String, val permission
         if (args.size < 2) {
             tabCommand.addAll(subCommand.keys)
             tabCommand.addAll(this.paimonTab(sender, command, args))
-            return tabCommand.filter { it.startsWith(args[args.size - 1]) }.toMutableList()
+            return tabCommand.filter { it.lowercase().startsWith(args[args.size - 1].lowercase()) }.toMutableList()
         }
         //循环所有命令参数表
         for (p in args) {
@@ -51,7 +54,7 @@ open class PaimonCommand(val paimon: Paimon, val command: String, val permission
                 if (mutableEntry.key == p) {
                     //给予子命令自身处理
                     return mutableEntry.value.tabComplete(sender, alias, args)
-                        .filter { it.startsWith(args[args.size - 1]) }.toMutableList()
+                        .filter { it.lowercase().startsWith(args[args.size - 1].lowercase()) }.toMutableList()
                 }
             }
         }
@@ -91,11 +94,11 @@ open class PaimonCommand(val paimon: Paimon, val command: String, val permission
 
     /**
      * 注册子命令
-     * @param paimonCommand 命令批处理类
+     * @param paimonSubCommand 子命令批处理类
      * @return 该子命令的父命令
      */
-    fun addSubCommand(paimonCommand: PaimonCommand): PaimonCommand {
-        subCommand[paimonCommand.command] = paimonCommand
+    fun addSubCommand(paimonSubCommand: PaimonCommand): PaimonCommand {
+        subCommand[paimonSubCommand.command] = paimonSubCommand
         return this
     }
 
@@ -104,7 +107,7 @@ open class PaimonCommand(val paimon: Paimon, val command: String, val permission
      * 注册命令
      * @return 该命令本体
      */
-    fun register(): PaimonCommand {
+    open fun register(): PaimonCommand {
         registerCommand(this)
         return this
     }
