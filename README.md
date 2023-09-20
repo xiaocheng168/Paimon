@@ -3,7 +3,7 @@
     <p>A Minecraft Bukkit Framework</p>
 </div>
 
-~~# About Paimon
+# About Paimon
 
 Paimon is a Bukkit plug-in rapid construction framework.
 you can use it to quickly build your Bukkit plug-in
