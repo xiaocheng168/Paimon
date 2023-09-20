@@ -1,5 +1,5 @@
 <component name="ArtifactManager">
-  <artifact type="jar" build-on-make="true" name="Paimon:jar">
+  <artifact type="jar" name="Paimon:jar">
     <output-path>$PROJECT_DIR$/../MinecraftServers/spigot1.12.2/plugins</output-path>
     <root id="archive" name="Paimon.jar">
       <element id="module-output" name="Paimon" />
