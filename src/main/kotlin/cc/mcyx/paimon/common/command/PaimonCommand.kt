@@ -115,11 +115,19 @@ open class PaimonCommand(val paimon: Paimon, val command: String, val permission
     private var paimonExec: ((sender: CommandSender, command: String, args: Array<out String>) -> Boolean)? =
         null
 
+    /**
+     * Tab命令补全请求
+     * @param event 批处理对象
+     */
     fun paimonTab(event: (sender: CommandSender, command: String, args: Array<out String>) -> MutableList<String>): PaimonCommand {
         this.paimonTab = event
         return this
     }
 
+    /**
+     * 命令执行触发方法
+     * @param event 批处理对象
+     */
     fun paimonExec(event: (sender: CommandSender, command: String, args: Array<out String>) -> Boolean): PaimonCommand {
         this.paimonExec = event
         return this
