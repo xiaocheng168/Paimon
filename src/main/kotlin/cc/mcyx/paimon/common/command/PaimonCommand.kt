@@ -2,9 +2,6 @@ package cc.mcyx.paimon.common.command
 
 import cc.mcyx.paimon.common.Paimon
 import cc.mcyx.paimon.common.nms.registerCommand
-import cc.mcyx.paimon.common.nms.removeCommand
-import com.sun.org.apache.xpath.internal.operations.Bool
-import org.bukkit.Location
 import org.bukkit.command.Command
 import org.bukkit.command.CommandSender
 
@@ -12,7 +9,11 @@ import org.bukkit.command.CommandSender
 /**
  * 命令批处理类
  */
-open class PaimonCommand(val paimon: Paimon, val command: String) : Command(command) {
+open class PaimonCommand(val paimon: Paimon, val command: String, val permissionNode: String = "") : Command(command) {
+
+    init {
+        if (this.permissionNode != "") this.permission = permissionNode
+    }
 
     //子命令
     private val subCommand: HashMap<String, PaimonCommand> = LinkedHashMap()
@@ -39,7 +40,8 @@ open class PaimonCommand(val paimon: Paimon, val command: String) : Command(comm
         val tabCommand = mutableListOf<String>()
         if (args.size < 2) {
             tabCommand.addAll(subCommand.keys)
-            return tabCommand
+            tabCommand.addAll(this.paimonTab(sender, command, args))
+            return tabCommand.filter { it.startsWith(args[args.size - 1]) }.toMutableList()
         }
         //循环所有命令参数表
         for (p in args) {
@@ -49,17 +51,18 @@ open class PaimonCommand(val paimon: Paimon, val command: String) : Command(comm
                 if (mutableEntry.key == p) {
                     //给予子命令自身处理
                     return mutableEntry.value.tabComplete(sender, alias, args)
+                        .filter { it.startsWith(args[args.size - 1]) }.toMutableList()
                 }
             }
         }
+
         //如果都没有表示到达命令当前位置，默认给予当前命令所有子命令
         tabCommand.addAll(subCommand.keys)
         //给与命令Tab处理反应 且结尾必须是空的 或者目前子命令为当前批处理对象
         if (args[args.size - 1] == "" || args[args.size - 2] == this.command) {
             tabCommand.addAll(this.paimonTab(sender, command, args))
         }
-
-        return tabCommand
+        return tabCommand.filter { it.startsWith(args[args.size - 1]) }.toMutableList()
     }
 
     /**
@@ -69,9 +72,10 @@ open class PaimonCommand(val paimon: Paimon, val command: String) : Command(comm
      * @param args 参数表
      * @return 返回命令是否执行有效
      */
-    open fun paimonExec(sender: CommandSender, command: String, args: Array<out String>): Boolean {
-        return false
+    private fun paimonExec(sender: CommandSender, command: String, args: Array<out String>): Boolean {
+        return paimonExec?.invoke(sender, command, args) ?: return false
     }
+
 
     /**
      * Tab命令补全请求
@@ -80,8 +84,8 @@ open class PaimonCommand(val paimon: Paimon, val command: String) : Command(comm
      * @param args 参数表
      * @return 返回命令是否执行有效
      */
-    open fun paimonTab(sender: CommandSender, command: String, args: Array<out String>): MutableList<String> {
-        return mutableListOf()
+    private fun paimonTab(sender: CommandSender, command: String, args: Array<out String>): MutableList<String> {
+        return paimonTab?.invoke(sender, command, args) ?: return mutableListOf()
     }
 
 
@@ -98,10 +102,26 @@ open class PaimonCommand(val paimon: Paimon, val command: String) : Command(comm
 
     /**
      * 注册命令
-     * @return 该子命令本体
+     * @return 该命令本体
      */
     fun register(): PaimonCommand {
         registerCommand(this)
+        return this
+    }
+
+
+    private var paimonTab: ((sender: CommandSender, command: String, args: Array<out String>) -> MutableList<String>)? =
+        null
+    private var paimonExec: ((sender: CommandSender, command: String, args: Array<out String>) -> Boolean)? =
+        null
+
+    fun paimonTab(event: (sender: CommandSender, command: String, args: Array<out String>) -> MutableList<String>): PaimonCommand {
+        this.paimonTab = event
+        return this
+    }
+
+    fun paimonExec(event: (sender: CommandSender, command: String, args: Array<out String>) -> Boolean): PaimonCommand {
+        this.paimonExec = event
         return this
     }
 }

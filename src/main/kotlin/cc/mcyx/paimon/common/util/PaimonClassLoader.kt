@@ -14,14 +14,19 @@ import java.util.jar.JarFile
 fun loadPlugin(paimon: Paimon) {
     val entries =
         JarFile(paimon.cl.getResource("plugin.yml")!!.file.replace("file:/", "").replace("!/plugin.yml", "")).entries()
-
+    // STOPSHIP: 判断插件是否重复加载、开始对GUI框架进行编写
     entries.iterator().forEach {
         if (!it.isDirectory) {
             //结尾必须是class
             if (it.name.endsWith(".class") && it.name.startsWith(Class.forName(paimon.description.main).`package`.name)) {
                 val classes = it.name.replace("/", ".").substring(0, it.name.length - 6)
-                //加载该类
-                paimon.cl.loadClass(classes)
+                try {
+                    //如果类不存在将导入
+                    Class.forName(classes)
+                } catch (e: ClassNotFoundException) {
+                    //加载该类
+                    paimon.cl.loadClass(classes)
+                }
             }
         }
     }
