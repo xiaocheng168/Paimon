@@ -8,6 +8,10 @@ import org.bukkit.plugin.java.JavaPlugin
  * Paimon Plugin 主类
  */
 open class Paimon : JavaPlugin() {
+    override fun onLoad() {
+        this.onLoaded()
+    }
+
     val cl: ClassLoader = classLoader
     final override fun onEnable() {
         loadPlugin(this)
@@ -19,6 +23,11 @@ open class Paimon : JavaPlugin() {
         this.onDisabled()
     }
 
+    /**
+     * 插件初始化
+     *
+     */
+    open fun onLoaded() {}
 
     /**
      * 插件加载完成
