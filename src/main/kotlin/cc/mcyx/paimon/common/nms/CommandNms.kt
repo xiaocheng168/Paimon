@@ -42,12 +42,17 @@ fun removeCommand(command: Command) {
     getKnownCommands().remove(command.name, command)
 }
 
+
 /**
  * 卸载某个Paimon插件注册的所有命令
  * @param paimon 插件主体
  */
+@Synchronized
 fun removePluginCommand(paimon: Paimon) {
     val pluginName = paimon.name.lowercase()
     val knownCommands = getKnownCommands()
-    knownCommands.values.filter { it.label.startsWith(pluginName) }.forEach { removeCommand(it) }
+    knownCommands.filter { it.key.startsWith(pluginName) }.forEach {
+        knownCommands.remove(it.key)
+        knownCommands.remove(it.key.replace("${pluginName}:", ""))
+    }
 }
