@@ -1,5 +1,5 @@
 <div align="center" style="margin-top: 128px">
-    <img src="paimon.jpg" width="200" height="200" style="border-radius: 20px" alt="Paimon">
+    <img src="paimon.png" width="200" height="200" alt="Paimon">
     <p>A Minecraft Bukkit Framework</p>
 </div>
 
