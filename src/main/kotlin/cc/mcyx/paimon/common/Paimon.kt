@@ -1,20 +1,22 @@
 package cc.mcyx.paimon.common
 
 import cc.mcyx.paimon.common.nms.removePluginCommand
-import cc.mcyx.paimon.common.util.loadPlugin
+import cc.mcyx.paimon.common.util.PaimonClassLoader
 import org.bukkit.plugin.java.JavaPlugin
 
 /**
- * Paimon Plugin 主类
+ * Paimon Plugin Kt 主类
  */
-open class Paimon : JavaPlugin() {
-    override fun onLoad() {
+abstract class Paimon : JavaPlugin() {
+    final override fun onLoad() {
         this.onLoaded()
     }
 
     val cl: ClassLoader = classLoader
     final override fun onEnable() {
-        loadPlugin(this)
+        //加载插件本体
+        val paimonClassLoader = PaimonClassLoader(this)
+        paimonClassLoader.loadPlugin()
         this.onEnabled()
     }
 
