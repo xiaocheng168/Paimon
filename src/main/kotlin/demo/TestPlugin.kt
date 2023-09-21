@@ -3,6 +3,7 @@ package demo
 import cc.mcyx.paimon.common.PaimonPlugin
 import cc.mcyx.paimon.common.command.PaimonCommand
 import cc.mcyx.paimon.common.command.PaimonSubCommand
+import cc.mcyx.paimon.common.minecraft.network.ProxyPlayerManager
 import cc.mcyx.paimon.common.ui.PaimonUI
 import cc.mcyx.paimon.common.util.sendCommandHelp
 import cc.mcyx.paimon.common.util.sendMessage
@@ -28,18 +29,16 @@ class TestPlugin : PaimonPlugin() {
 
                 it.paimonExec { sender, command, args ->
                     if (sender is Player) {
+                        val paimonPlayer = ProxyPlayerManager.getPaimonPlayer(sender)
+                        val paimonUI = PaimonUI(PaimonUI.PaimonUIType.ANVIL).open(paimonPlayer)
 
-                        PaimonUI(InventoryType.HOPPER, "halo").open(sender)
-                            .open {
-                                println(it)
-                            }.click {
-                                it.isCancelled = true
-                            }.setButton(0, ItemStack(Material.APPLE)) { player, slot, item ->
-                                player.kickPlayer("你！")
-                            }.setButton(2, ItemStack(Material.BOOK)) { player, slot, item ->
-                                player.sendMessage("你点了我这个物品！！！")
-                            }
+                        paimonUI.setItem(0, ItemStack(Material.APPLE)){
 
+                        }
+                        paimonUI.clickEvent {
+                            it.isCancel = true
+                            println(it)
+                        }
                     }
                     return@paimonExec true
                 }
