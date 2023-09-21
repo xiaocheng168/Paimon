@@ -44,16 +44,14 @@ class PaimonUI(paimonUIType: PaimonUIType, head: String = "空空如也") {
         paimonPlayer.packetListener { it ->
             //玩家点击某个地方与按钮
             if (it.packet::class.java == CraftBukkitPacket.asNMSClass("PacketPlayInWindowClick")) {
+
                 val packetPlayInWindowClick = CraftBukkitPacket.asNMSClass("PacketPlayInWindowClick").cast(it.packet)
                 packetPlayInWindowClick.javaClass.getDeclaredField("item").also {
                     it.isAccessible = true
-                    //解析读取Item
+                    //解析读取Item 如果是空就不解析与触发！
+                    val nmsItem: Any = it.get(packetPlayInWindowClick) ?: return@packetListener
                     CraftBukkitPacket.nmsItemToItemStack(
-                        CraftBukkitPacket.itemStack.cast(
-                            it.get(
-                                packetPlayInWindowClick
-                            )
-                        )
+                        CraftBukkitPacket.itemStack.cast(nmsItem)
                     ).apply {
                         val paimonUIClickEvent = PaimonUIClickEvent(
                             this@PaimonUI,
@@ -146,15 +144,22 @@ class PaimonUI(paimonUIType: PaimonUIType, head: String = "空空如也") {
     }
 
 
-    enum class PaimonUIType(val type: String, val size: Int) {
-        CHEST_9("minecraft:chest", 9),
-        CHEST_18("minecraft:chest", 18),
-        CHEST_24("minecraft:chest", 24),
-        CHEST_36("minecraft:chest", 36),
-        CHEST_48("minecraft:chest", 48),
-        CHEST_56("minecraft:chest", 56),
-        HOPPER("minecraft:hopper", 5),
-        ANVIL("minecraft:anvil", 3),
+    /**
+     * 界面编号
+     * @param type <= 1.13 字符串
+     * @param size 尺寸
+     * @param v14p >= 1.14 版本
+     * @param v17p >= 1.17
+     */
+    enum class PaimonUIType(val type: String, val size: Int, val v14p: String, val v17p: String) {
+        CHEST_9("minecraft:chest", 9, "GENERIC_9X1", "a"),
+        CHEST_18("minecraft:chest", 18, "GENERIC_9X2", "a"),
+        CHEST_24("minecraft:chest", 24, "GENERIC_9X3", "a"),
+        CHEST_36("minecraft:chest", 36, "GENERIC_9X4", "a"),
+        CHEST_48("minecraft:chest", 48, "GENERIC_9X5", "a"),
+        CHEST_56("minecraft:chest", 56, "GENERIC_9X6", "a"),
+        HOPPER("minecraft:hopper", 5, "HOPPER", "p"),
+        ANVIL("minecraft:anvil", 8, "ANVIL", "h"),
     }
 
 }
