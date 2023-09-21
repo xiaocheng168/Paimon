@@ -1,7 +1,7 @@
 package cc.mcyx.paimon.common.command
 
-import cc.mcyx.paimon.common.plugin.Paimon
 import cc.mcyx.paimon.common.minecraft.craftbukkit.registerCommand
+import cc.mcyx.paimon.common.plugin.Paimon
 import org.bukkit.command.Command
 import org.bukkit.command.CommandSender
 
@@ -12,7 +12,8 @@ import org.bukkit.command.CommandSender
  * @param command 命令头
  * @param permissionNode 权限节点
  */
-open class PaimonCommand(val paimon: Paimon, val command: String, private val permissionNode: String = "") : Command(command) {
+open class PaimonCommand(val paimon: Paimon, val command: String, private val permissionNode: String = "") :
+    Command(command) {
 
     init {
         if (this.permissionNode != "") this.permission = permissionNode
