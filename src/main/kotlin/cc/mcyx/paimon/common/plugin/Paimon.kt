@@ -1,5 +1,7 @@
 package cc.mcyx.paimon.common.plugin
 
+import cc.mcyx.paimon.common.listener.RootListener
+import cc.mcyx.paimon.common.minecraft.craftbukkit.registerListener
 import cc.mcyx.paimon.common.minecraft.craftbukkit.removePluginCommand
 import cc.mcyx.paimon.common.util.PaimonClassLoader
 import org.bukkit.plugin.java.JavaPlugin
@@ -16,6 +18,8 @@ abstract class Paimon : JavaPlugin() {
     final override fun onEnable() {
         //加载插件本体
         val paimonClassLoader = PaimonClassLoader(this)
+        //注册玩家根监听器
+        registerListener(RootListener())
         paimonClassLoader.loadPlugin()
         this.onEnabled()
     }
