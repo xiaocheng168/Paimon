@@ -1,7 +1,8 @@
 package cc.mcyx.paimon.common.util
 
-import cc.mcyx.paimon.common.Paimon
+import cc.mcyx.paimon.common.plugin.Paimon
 import cc.mcyx.paimon.common.listener.PaimonAutoListener
+import cc.mcyx.paimon.common.minecraft.craftbukkit.registerListener
 import org.bukkit.Bukkit
 import org.bukkit.event.Listener
 import java.util.*
@@ -30,7 +31,7 @@ open class PaimonClassLoader(val paimon: Paimon) {
             if (!it.isInterface) {
                 //判断这个类是否存在 PaimonListener
                 if (it.interfaces.contains(PaimonAutoListener::class.java)) {
-                    Bukkit.getPluginManager().registerEvents(it.newInstance() as Listener, paimon)
+                    registerListener(it.newInstance() as PaimonAutoListener)
                 }
             }
         }
