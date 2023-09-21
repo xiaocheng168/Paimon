@@ -95,13 +95,18 @@
             <version>1.9.10</version>
         </dependency>
 
-
         <dependency>
             <groupId>org.spigotmc</groupId>
             <artifactId>spigot-api</artifactId>
             <version>1.12.2-R0.1-SNAPSHOT</version>
-            <systemPath>${project.basedir}/lib/Spigot.1.12.2.jar</systemPath>
-            <scope>system</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>nms-all</groupId>
+            <artifactId>nms-all</artifactId>
+            <version>1.0.0</version>
+            <systemPath>${project.basedir}/lib/nms-all-1.0.0.jar</systemPath>
+            <scope>runtime</scope>
         </dependency>
     </dependencies>
 
