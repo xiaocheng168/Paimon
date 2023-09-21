@@ -3,11 +3,14 @@ package demo
 import cc.mcyx.paimon.common.PaimonPlugin
 import cc.mcyx.paimon.common.command.PaimonCommand
 import cc.mcyx.paimon.common.command.PaimonSubCommand
+import cc.mcyx.paimon.common.ui.PaimonUI
 import cc.mcyx.paimon.common.util.sendCommandHelp
 import cc.mcyx.paimon.common.util.sendMessage
 import org.bukkit.Bukkit
+import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.event.inventory.InventoryType
+import org.bukkit.inventory.ItemStack
 
 class TestPlugin : PaimonPlugin() {
     override fun onEnabled() {
@@ -20,15 +23,31 @@ class TestPlugin : PaimonPlugin() {
         rootCommand.addSubCommand(
             PaimonSubCommand(
                 paimon = this,
-                command = "open",
-                rootCommand = rootCommand
+                command = "open"
             ).also { it ->
+
+                it.paimonExec { sender, command, args ->
+                    if (sender is Player) {
+
+                        PaimonUI(InventoryType.HOPPER, "halo").open(sender)
+                            .open {
+                                println(it)
+                            }.click {
+                                it.isCancelled = true
+                            }.setButton(0, ItemStack(Material.APPLE)) { player, slot, item ->
+                                player.kickPlayer("你！")
+                            }.setButton(2, ItemStack(Material.BOOK)) { player, slot, item ->
+                                player.sendMessage("你点了我这个物品！！！")
+                            }
+
+                    }
+                    return@paimonExec true
+                }
 
                 it.addSubCommand(
                     PaimonSubCommand(
                         paimon = this,
-                        command = "type",
-                        rootCommand = rootCommand
+                        command = "type"
                     ).also {
                         it.description = "[类型] 打开一个界面"
                     }.paimonTab { _, _, _ ->
@@ -50,16 +69,14 @@ class TestPlugin : PaimonPlugin() {
                         return@paimonExec true
                     }
                 )
-
             })
 
         rootCommand.addSubCommand(PaimonSubCommand(
             paimon = this,
-            command = "send",
-            rootCommand = rootCommand
+            command = "send"
         ).also {
             it.description = "发送一条消息"
-            it.paimonExec { sender, _, args ->
+            it.paimonExec { sender, _, _ ->
                 sendMessage(sender, "发了哦！")
                 return@paimonExec true
             }
