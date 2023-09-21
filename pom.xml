@@ -106,7 +106,7 @@
             <artifactId>nms-all</artifactId>
             <version>1.0.0</version>
             <systemPath>${project.basedir}/lib/nms-all-1.0.0.jar</systemPath>
-            <scope>runtime</scope>
+            <scope>system</scope>
         </dependency>
     </dependencies>
 
