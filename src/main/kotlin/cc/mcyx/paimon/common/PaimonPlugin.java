@@ -1,5 +1,7 @@
 package cc.mcyx.paimon.common;
 
+import cc.mcyx.paimon.common.plugin.Paimon;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -24,6 +26,12 @@ public class PaimonPlugin extends Paimon {
     public static File libFolder = new File(rootFolder, "lib");
     //依赖文件列表
     public static List<LibInfo> libs = new LinkedList<>();
+
+    public static PaimonPlugin paimonPlugin;
+
+    {
+        paimonPlugin = this;
+    }
 
     static {
         //基础的 Kotlin 依赖
@@ -91,6 +99,7 @@ public class PaimonPlugin extends Paimon {
      * 加载Jar
      *
      * @param jarFile 加载的jar文件
+     * @throws Exception 可能会出现URL无法访问的问题
      */
     public static void loadJar(File jarFile) throws Exception {
         Method addURL = URLClassLoader.class.getDeclaredMethod("addURL", URL.class);
