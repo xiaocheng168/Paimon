@@ -1,13 +1,13 @@
-package cc.mcyx.paimon.common.nms
+package cc.mcyx.paimon.common.minecraft.craftbukkit
 
-import cc.mcyx.paimon.common.Paimon
+import cc.mcyx.paimon.common.plugin.Paimon
 import cc.mcyx.paimon.common.command.PaimonCommand
 import org.bukkit.Bukkit
 import org.bukkit.command.Command
 import org.bukkit.command.SimpleCommandMap
 
 //CraftServer Class
-val craftServer: Class<*> = Class.forName(NMSPacket.craftServer)
+val craftServer: Class<*> = Class.forName(CraftBukkitPacket.craftServer)
 
 //Craft SimpleCommandMap 命令表对象
 val simpleCommandMap: SimpleCommandMap =

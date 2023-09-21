@@ -1,6 +1,6 @@
-package cc.mcyx.paimon.common
+package cc.mcyx.paimon.common.plugin
 
-import cc.mcyx.paimon.common.nms.removePluginCommand
+import cc.mcyx.paimon.common.minecraft.craftbukkit.removePluginCommand
 import cc.mcyx.paimon.common.util.PaimonClassLoader
 import org.bukkit.plugin.java.JavaPlugin
 
