@@ -2,10 +2,7 @@ package cc.mcyx.paimon.common;
 
 import cc.mcyx.paimon.common.plugin.Paimon;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.lang.reflect.Method;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -42,8 +39,9 @@ public class PaimonPlugin extends Paimon {
 
         //建立所有子文件夹
         if (libFolder.mkdirs()) {
-            System.out.println("init libFolder");
+            System.out.println("[Paimon] create libFolder ok!");
         }
+
         try {
             //遍历素有需要加载的依赖
             libs.forEach((lib) -> {
@@ -68,7 +66,6 @@ public class PaimonPlugin extends Paimon {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-
     }
 
     /**
@@ -81,11 +78,13 @@ public class PaimonPlugin extends Paimon {
 
         try {
             HttpURLConnection urlConnection = (HttpURLConnection) new URL(url).openConnection();
+            urlConnection.setConnectTimeout(3000);
             int ready;
             byte[] bytes = new byte[10240];
             StringBuilder stringBuilder = new StringBuilder();
+            InputStream inputStream = urlConnection.getInputStream();
             //获取页面内容
-            while ((ready = urlConnection.getInputStream().read(bytes)) != -1) {
+            while ((ready = inputStream.read(bytes)) != -1) {
                 stringBuilder.append(new String(bytes, 0, ready));
             }
             //返回页面内容
@@ -116,6 +115,7 @@ public class PaimonPlugin extends Paimon {
      */
     public static void downloadJar(URL url) throws IOException {
         HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+        urlConnection.setConnectTimeout(3000);
         int ready;
         byte[] bytes = new byte[10240];
         //建立文件输出流
