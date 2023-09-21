@@ -7,7 +7,7 @@ import org.bukkit.command.Command
 import org.bukkit.command.SimpleCommandMap
 
 //CraftServer Class
-val craftServer: Class<*> = Class.forName(CraftBukkitPacket.craftServer)
+val craftServer: Class<*> = CraftBukkitPacket.craftServer
 
 //Craft SimpleCommandMap 命令表对象
 val simpleCommandMap: SimpleCommandMap =
