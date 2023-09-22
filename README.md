@@ -37,7 +37,7 @@ you can use it to quickly build your Bukkit plug-in
 <dependency>
     <groupId>com.github.xiaocheng168</groupId>
     <artifactId>Paimon</artifactId>
-    <version>tv101</version>
+    <version>tv102</version>
 </dependency>
 ```
 
