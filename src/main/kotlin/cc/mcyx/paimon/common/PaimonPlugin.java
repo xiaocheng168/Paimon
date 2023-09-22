@@ -1,6 +1,7 @@
 package cc.mcyx.paimon.common;
 
 import cc.mcyx.paimon.common.plugin.Paimon;
+import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.*;
 import java.lang.reflect.Method;
@@ -11,6 +12,8 @@ import java.security.MessageDigest;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 
 /**
  * PaimonPlugin 插件类
@@ -26,23 +29,15 @@ public class PaimonPlugin extends Paimon {
 
     public static PaimonPlugin paimonPlugin;
 
-    {
-        paimonPlugin = this;
-    }
-
     static {
-        //基础的 Kotlin 依赖
-        libs.add(new LibInfo("https://repo1.maven.org/maven2/org/jetbrains/kotlin/kotlin-stdlib-common/1.9.10/kotlin-stdlib-common-1.9.10.jar"));
-
-        libs.add(new LibInfo("https://repo1.maven.org/maven2/org/jetbrains/kotlin/kotlin-stdlib/1.9.10/kotlin-stdlib-1.9.10.jar"));
-
-
-        //建立所有子文件夹
-        if (libFolder.mkdirs()) {
-            System.out.println("[Paimon] create libFolder ok!");
-        }
-
         try {
+            //基础的 Kotlin 依赖
+            libs.add(new LibInfo("https://repo1.maven.org/maven2/org/jetbrains/kotlin/kotlin-stdlib-common/1.9.10/kotlin-stdlib-common-1.9.10.jar"));
+            libs.add(new LibInfo("https://repo1.maven.org/maven2/org/jetbrains/kotlin/kotlin-stdlib/1.9.10/kotlin-stdlib-1.9.10.jar"));
+            //建立所有子文件夹
+            if (libFolder.mkdirs()) {
+                System.out.println("[Paimon] create libFolder ok!");
+            }
             //遍历素有需要加载的依赖
             libs.forEach((lib) -> {
                 try {
@@ -64,8 +59,51 @@ public class PaimonPlugin extends Paimon {
             }
 
         } catch (Exception e) {
+            e.printStackTrace();
+            System.exit(0);
+        }
+    }
+
+    {
+        paimonPlugin = this;
+    }
+
+    /**
+     * 获取插件名
+     *
+     * @return 插件名
+     */
+
+    public static String getThisPluginName() {
+        return getPluginYmlConfig().getString("name");
+    }
+
+    /**
+     * 获取插件Yaml配置
+     *
+     * @return 返回Bukkit Yaml配置处理类
+     */
+    public static YamlConfiguration getPluginYmlConfig() {
+        URL location = getPluginJarFile();
+        try {
+            JarFile jarFile = new JarFile(location.getFile());
+            JarEntry pluginYml = jarFile.getJarEntry("plugin.yml");
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(jarFile.getInputStream(pluginYml)));
+            YamlConfiguration yamlConfiguration = YamlConfiguration.loadConfiguration(bufferedReader);
+            bufferedReader.close();
+            return yamlConfiguration;
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    /**
+     * 获取插件jar文件
+     *
+     * @return jar路径
+     */
+    public static URL getPluginJarFile() {
+        return PaimonPlugin.class.getProtectionDomain().getCodeSource().getLocation();
     }
 
     /**
@@ -101,11 +139,26 @@ public class PaimonPlugin extends Paimon {
      * @throws Exception 可能会出现URL无法访问的问题
      */
     public static void loadJar(File jarFile) throws Exception {
+
         Method addURL = URLClassLoader.class.getDeclaredMethod("addURL", URL.class);
         addURL.setAccessible(true);
-        addURL.invoke(ClassLoader.getSystemClassLoader(), jarFile.toURI().toURL());
+        addURL.invoke(Paimon.class.getClassLoader(), jarFile.toURI().toURL());
         addURL.setAccessible(false);
+
+   /*     URLClassLoader urlClassLoader = (URLClassLoader) ClassLoader.getSystemClassLoader();
+        JarFile jf = new JarFile(jarFile);
+        Enumeration<JarEntry> entries = jf.entries();
+        while (entries.hasMoreElements()) {
+            JarEntry jarEntry = entries.nextElement();
+            String classFile = jarEntry.getName();
+            if (classFile.endsWith(".class") && !classFile.startsWith("META-INF")) {
+                String classPath = classFile.replace("/", ".").replace(".class", "");
+                urlClassLoader.loadClass(classPath);
+            }
+        }
+        jf.close();*/
     }
+
 
     /**
      * 下载某个Jar路径到Paimon/lib
