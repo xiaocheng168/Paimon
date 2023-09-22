@@ -5,6 +5,7 @@ import cc.mcyx.paimon.common.ui.PaimonUI
 import io.netty.channel.Channel
 import io.netty.channel.ChannelDuplexHandler
 import io.netty.channel.ChannelHandlerContext
+import net.minecraft.network.NetworkManager
 import org.bukkit.entity.Player
 
 class PaimonPlayer(val player: Player) {
@@ -14,13 +15,13 @@ class PaimonPlayer(val player: Player) {
         CraftBukkitPacket.craftPlayer.getDeclaredMethod("getHandle").invoke(player)
 
     //PlayerConnection 玩家连接
-    private val connection: Any = entityPlayer.javaClass.getDeclaredField("playerConnection").get(entityPlayer)
+    private val connection: Any = CraftBukkitPacket.getObject(entityPlayer, "PlayerConnection")
 
     //Network 网络类
-    private val network: Any = connection.javaClass.getDeclaredField("networkManager").get(connection)
+    private val network: Any = CraftBukkitPacket.getObject(connection, "NetworkManager")
 
     //NIO Channel通道对象
-    private val channel = network.javaClass.getDeclaredField("channel").get(network) as Channel
+    private val channel: Channel = CraftBukkitPacket.getObject(network, "Channel") as Channel
 
     //数据包处理对象
     private val packetHandler = object : ChannelDuplexHandler() {
@@ -71,12 +72,19 @@ class PaimonPlayer(val player: Player) {
     fun sendPacket(packet: Any) {
         packet.javaClass.also {
             //判断发送的是否为 Packet 数据包
-            if (it.interfaces.contains(Class.forName("${CraftBukkitPacket.nmsPacket}.Packet"))) {
+            if (it.interfaces.contains(CraftBukkitPacket.asNMSPacketClass("Packet"))) {
                 for (genericInterface in it.genericInterfaces) {
                     if (genericInterface.toString().endsWith(".PacketListenerPlayOut>")) {
-                        connection.javaClass.getDeclaredMethod("sendPacket", CraftBukkitPacket.packet)
-                            .invoke(connection, packet)
-                        return@also
+                        //查找对应的发包方法
+                        for (declaredMethod in connection.javaClass.declaredMethods) {
+                            if (declaredMethod.parameterTypes.size == 1 &&
+                                declaredMethod.parameterTypes[0] == CraftBukkitPacket.asNMSPacketClass("Packet")
+                            ) {
+                                //发送数据包
+                                declaredMethod.invoke(connection, packet)
+                                return@also
+                            }
+                        }
                     }
                 }
                 throw RuntimeException("Packet not is a Packet<PacketListenerPlayOut> type")
