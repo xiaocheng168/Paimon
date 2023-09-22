@@ -6,9 +6,14 @@ import org.bukkit.inventory.ItemStack
 
 /**
  * NMS类
+ * 这里的类不能出现异常，否则会影响其他地方加载它！
  */
 abstract class CraftBukkitPacket {
     companion object {
+
+        //解析数字版本号
+        private val versionSplit = Bukkit.getBukkitVersion().split("-")
+        val serverId: Int = versionSplit[0].replace(".", "").toInt()
 
         //Bukkit Packet
         private val craftBukkit: String = Bukkit.getServer().javaClass.`package`.name
@@ -17,24 +22,40 @@ abstract class CraftBukkitPacket {
         val craftItemStack = asBukkitClass("inventory.CraftItemStack")
         val craftServer = asBukkitClass("CraftServer")
 
-
         //NMS Packet
-        val nmsPacket = "net.minecraft.server.$nmsVersion"
+        val nmsPacket = if (serverId < 1170) "net.minecraft.server.$nmsVersion" else "net.minecraft"
         val packet = asNMSClass("Packet")
-        val packetPlayOutOpenWindow = asNMSClass("PacketPlayOutOpenWindow")
-        val packetPlayInWindowClick = asNMSClass("PacketPlayInWindowClick")
-        val packetPlayOutSetSlot = asNMSClass("PacketPlayOutSetSlot")
+        val packetPlayOutOpenWindow = asNMSGamePacketClass("PacketPlayOutOpenWindow")
+        val packetPlayInWindowClick = asNMSGamePacketClass("PacketPlayInWindowClick")
+        val packetPlayOutSetSlot = asNMSGamePacketClass("PacketPlayOutSetSlot")
         val chatComponentText = asNMSClass("ChatComponentText")
-        val iChatBaseComponent = asNMSClass("IChatBaseComponent")
-        val itemStack = asNMSClass("ItemStack")
+        val iChatBaseComponent =
+            if (serverId < 1170) asNMSClass("IChatBaseComponent") else asNMSClass("network.chat.IChatBaseComponent")
+        val itemStack = if (serverId < 1170) asNMSClass("ItemStack") else asNMSClass("world.item.ItemStack")
+
+        //这是一个1.14+=的类 低版本都没用
+        val containers = if (serverId < 1170) asNMSClass("Containers") else asNMSClass("world.inventory.Containers")
 
         /**
-         * 包.类 转 Class<*>
+        //         * 包.类 转 Class<*>
          *   @param classes 包.类 绝对路径
          *   @return 返回Class<*>
          */
         fun asNMSClass(classes: String): Class<*> {
-            return Class.forName("$nmsPacket.$classes")
+            return try {
+                //如果报错了就返回Nothing类
+                Class.forName("$nmsPacket.$classes")
+            } catch (e: Exception) {
+                Unit::class.java
+            }
+        }
+
+        fun asNMSGamePacketClass(packet: String): Class<*> {
+            return if (serverId >= 1170) return asNMSClass("network.protocol.game.$packet") else this.asNMSClass(packet)
+        }
+
+        fun asNMSPacketClass(packet: String): Class<*> {
+            return if (serverId >= 1170) return asNMSClass("network.protocol.$packet") else this.asNMSClass(packet)
         }
 
         /**
@@ -47,12 +68,32 @@ abstract class CraftBukkitPacket {
         }
 
         /**
-         * 获取NMS的 ChatMessage
-         * @param msg 转换内容
-         * @return 返回ChatMessage
+         * 通过反射获取文本通信信息类
+         *
+         * @param str 通信内容
+         * @return 返回对应版本的 ChatComponentText
          */
-        fun stringAsChatComponentText(msg: String): Any {
-            return chatComponentText.getConstructor(String::class.java).newInstance(msg)
+        fun getChatComponentText(str: String?): Any {
+            return try {
+                val aClass: Class<*>
+                if (serverId >= 1190) {
+                    //>= 1.19
+                    aClass = Class.forName("net.minecraft.network.chat.IChatBaseComponent")
+                    val a = aClass.getMethod("a", String::class.java)
+                    return a.invoke(aClass, str)
+                }
+                aClass = if (serverId >= 1180) {
+                    //>= 1.17
+                    Class.forName("net.minecraft.network.chat.ChatComponentText")
+                } else {
+                    // < 1.17
+                    asNMSClass("ChatComponentText")
+                }
+                val constructor = aClass.getConstructor(String::class.java)
+                constructor.newInstance(str)
+            } catch (e: java.lang.Exception) {
+                throw RuntimeException(e)
+            }
         }
 
 
@@ -63,24 +104,55 @@ abstract class CraftBukkitPacket {
          * @param size 大小
          * @return 封装好的Packet数据包
          */
-        fun createGUIPacket(nextContainerCounter: Int, minecraftUIName: String, head: String, size: Int = 9): Any {
+        fun createGUIPacket(
+            nextContainerCounter: Int,
+            paimonUIType: PaimonUI.PaimonUIType,
+            head: String,
+            size: Int = 9
+        ): Any {
+
+            if (containers != Unit.javaClass) {
+                return if (paimonUIType == PaimonUI.PaimonUIType.ANVIL) {
+                    packetPlayOutOpenWindow.getConstructor(
+                        Int::class.java,
+                        containers,
+                        iChatBaseComponent,
+                    ).newInstance(
+                        nextContainerCounter,
+                        containers.getDeclaredField(if (serverId >= 1170) paimonUIType.v17p else paimonUIType.v14p)
+                            .get(containers),
+                        getChatComponentText(head)
+                    )
+                } else packetPlayOutOpenWindow.getConstructor(
+                    Int::class.java,
+                    containers,
+                    iChatBaseComponent,
+                    Int::class.java
+                ).newInstance(
+                    nextContainerCounter,
+                    containers.getDeclaredField(if (serverId >= 1170) paimonUIType.v17p else paimonUIType.v14p)
+                        .get(containers),
+                    getChatComponentText(head),
+                    size
+                )
+
+            }
 
             //anvil特殊处理
-            if (minecraftUIName == PaimonUI.PaimonUIType.ANVIL.type) {
-                return packetPlayOutOpenWindow.getConstructor(
+            return if (paimonUIType == PaimonUI.PaimonUIType.ANVIL) {
+                packetPlayOutOpenWindow.getConstructor(
                     Int::class.java,
                     String::class.java,
                     iChatBaseComponent,
-                ).newInstance(nextContainerCounter, minecraftUIName, stringAsChatComponentText(head))
+                ).newInstance(nextContainerCounter, paimonUIType.type, getChatComponentText(head))
+            } else {
+                packetPlayOutOpenWindow.getConstructor(
+                    Int::class.java,
+                    String::class.java,
+                    iChatBaseComponent,
+                    Int::class.java
+                ).newInstance(nextContainerCounter, paimonUIType.type, getChatComponentText(head), size)
             }
-
-
-            return packetPlayOutOpenWindow.getConstructor(
-                Int::class.java,
-                String::class.java,
-                iChatBaseComponent,
-                Int::class.java
-            ).newInstance(nextContainerCounter, minecraftUIName, stringAsChatComponentText(head), size)
         }
 
         /**
@@ -91,9 +163,24 @@ abstract class CraftBukkitPacket {
          */
 
         fun createSlotItemPacket(nextContainerCounter: Int, slot: Int, itemStack: ItemStack): Any {
+            if (serverId >= 1180) {
+                return packetPlayOutSetSlot.getConstructor(
+                    Int::class.java,
+                    Int::class.java,
+                    Int::class.java,
+                    this.itemStack
+                )
+                    .newInstance(
+                        nextContainerCounter,
+                        slot,
+                        0,
+                        bukkitItemToNMSItem(itemStack)
+                    )
+            }
             return packetPlayOutSetSlot.getConstructor(Int::class.java, Int::class.java, this.itemStack)
                 .newInstance(
-                    nextContainerCounter, slot,
+                    nextContainerCounter,
+                    slot,
                     bukkitItemToNMSItem(itemStack)
                 )
         }
@@ -114,6 +201,24 @@ abstract class CraftBukkitPacket {
         fun bukkitItemToNMSItem(bkItem: ItemStack): Any {
             return craftItemStack.getDeclaredMethod("asNMSCopy", ItemStack::class.java)
                 .invoke(craftItemStack, bkItem)
+        }
+
+
+        /**
+         * 获取混淆类中的某个类型数据
+         * @param getObject 来源对象
+         * @param type 获取的类型
+         * @return 返回获取到的数据
+         */
+        fun getObject(getObject: Any, type: String): Any {
+            //获取高版本的 NetworkManager
+            for (declaredField in getObject.javaClass.declaredFields) {
+                if (declaredField.type.toString().endsWith(type)) {
+                    declaredField.isAccessible = true
+                    return declaredField.get(getObject)
+                }
+            }
+            return Unit
         }
     }
 }
