@@ -1,4 +1,4 @@
-package cc.mcyx.paimon.common.util
+package cc.mcyx.paimon.common.minecraft.network
 
 import cc.mcyx.paimon.common.command.PaimonCommand
 import org.bukkit.command.CommandSender

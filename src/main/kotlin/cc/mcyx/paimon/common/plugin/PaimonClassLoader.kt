@@ -1,9 +1,8 @@
-package cc.mcyx.paimon.common.util
+package cc.mcyx.paimon.common.plugin
 
 import cc.mcyx.paimon.common.PaimonPlugin
 import cc.mcyx.paimon.common.listener.PaimonAutoListener
 import cc.mcyx.paimon.common.minecraft.craftbukkit.registerListener
-import cc.mcyx.paimon.common.plugin.Paimon
 import java.lang.reflect.Field
 import java.util.jar.JarFile
 
@@ -14,7 +13,7 @@ open class PaimonClassLoader(val paimon: Paimon) {
     open fun loadPlugin() {
         val jarFile = JarFile(PaimonPlugin.getPluginJarFile().file)
         //加载类
-        this.loadJarClass(jarFile).forEach { loadClass(it) }
+        this.findJarAllClass(jarFile).forEach { loadClass(it) }
         //无法自动监听所有类
         //反射获取插件所有加载列表
         val declaredField: Field = Paimon::class.java.classLoader::class.java.getDeclaredField("classes")
@@ -44,7 +43,7 @@ open class PaimonClassLoader(val paimon: Paimon) {
      * @param jarFile jar文件
      * @return 类列表
      */
-    open fun loadJarClass(jarFile: JarFile): MutableList<String> {
+    open fun findJarAllClass(jarFile: JarFile): MutableList<String> {
         val classesList = mutableListOf<String>()
         // STOPSHIP: 判断插件是否重复加载、开始对GUI框架进行编写
         jarFile.entries().iterator().forEach {
