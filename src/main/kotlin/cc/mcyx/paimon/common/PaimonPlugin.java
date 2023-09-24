@@ -1,7 +1,6 @@
 package cc.mcyx.paimon.common;
 
 import cc.mcyx.paimon.common.plugin.Paimon;
-import cn.hutool.crypto.digest.MD5;
 import org.bukkit.configuration.file.YamlConfiguration;
 import sun.misc.Unsafe;
 
@@ -78,6 +77,7 @@ public class PaimonPlugin extends Paimon {
             //基础的 Kotlin 依赖
             libs.add(new LibInfo(maven + "org/jetbrains/kotlin/kotlin-stdlib-common/1.9.10/kotlin-stdlib-common-1.9.10.jar"));
             libs.add(new LibInfo(maven + "org/jetbrains/kotlin/kotlin-stdlib/1.9.10/kotlin-stdlib-1.9.10.jar"));
+            //Hutool 工具库
             libs.add(new LibInfo(maven + "cn/hutool/hutool-all/5.8.16/hutool-all-5.8.16.jar"));
             //建立所有子文件夹
             if (libFolder.mkdirs()) {
@@ -98,9 +98,8 @@ public class PaimonPlugin extends Paimon {
             for (File jar : (Objects.requireNonNull(libFolder.listFiles()))) {
                 loadJar(jar);
             }
-
         } catch (Throwable e) {
-            System.out.println("[Paimon] " + getThisPluginName() + " error!!!!");
+            System.err.printf("[Paimon!!!!] LoadPlugin [%s] Error!!!!\n", getThisPluginName());
             e.printStackTrace();
             System.exit(0);
         }
@@ -129,7 +128,7 @@ public class PaimonPlugin extends Paimon {
         URL location = getPluginJarFile();
         try {
             JarFile jarFile = new JarFile(location.getFile());
-            JarEntry pluginYml = jarFile.getJarEntry("src/test/plugin.yml");
+            JarEntry pluginYml = jarFile.getJarEntry("plugin.yml");
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(jarFile.getInputStream(pluginYml)));
             YamlConfiguration yamlConfiguration = YamlConfiguration.loadConfiguration(bufferedReader);
             bufferedReader.close();
