@@ -22,6 +22,10 @@ class PaimonPlayer(val player: Player) {
     //NIO Channel通道对象
     private val channel: Channel = CraftBukkitPacket.getObject(network, "Channel") as Channel
 
+    //发包方法
+    private val sendPacketMethod =
+        CraftBukkitPacket.getClassMethod(connection::class.java, Void::class.java, CraftBukkitPacket.packet)
+
     //数据包处理对象
     private val packetHandler = object : ChannelDuplexHandler() {
         override fun channelRead(ctx: ChannelHandlerContext?, msg: Any?) {
@@ -40,6 +44,8 @@ class PaimonPlayer(val player: Player) {
         try {
             //尝试删除该玩家的通道
             channel.pipeline().remove(player.name)
+            //报错代表不存在将添加通道用于监听收到的数据包Packet<*>
+            channel.pipeline().addBefore("packet_handler", player.name, packetHandler)
         } catch (e: Exception) {
             //报错代表不存在将添加通道用于监听收到的数据包Packet<*>
             channel.pipeline().addBefore("packet_handler", player.name, packetHandler)
@@ -71,19 +77,21 @@ class PaimonPlayer(val player: Player) {
     fun sendPacket(packet: Any) {
         packet.javaClass.also {
             //判断发送的是否为 Packet 数据包
-            if (it.interfaces.contains(CraftBukkitPacket.asNMSPacketClass("Packet"))) {
+            if (it.interfaces.contains(CraftBukkitPacket.packet)) {
                 for (genericInterface in it.genericInterfaces) {
                     if (genericInterface.toString().endsWith(".PacketListenerPlayOut>")) {
                         //查找对应的发包方法
                         for (declaredMethod in connection.javaClass.declaredMethods) {
+                            //判断该方法是否为发包方法
                             if (declaredMethod.parameterTypes.size == 1 &&
-                                declaredMethod.parameterTypes[0] == CraftBukkitPacket.asNMSPacketClass("Packet")
+                                declaredMethod.parameterTypes[0] == CraftBukkitPacket.packet
                             ) {
                                 //发送数据包
-                                declaredMethod.invoke(connection, packet)
+                                sendPacketMethod?.invoke(connection, packet)
                                 return@also
                             }
                         }
+
                     }
                 }
                 throw RuntimeException("Packet not is a Packet<PacketListenerPlayOut> type")
