@@ -12,18 +12,21 @@ you can use it to quickly build your Bukkit plug-in
 
 1. [x] Auto register listeners (Bukkit Listener)
 2. [x] Fast register commands (Minecraft Command)
+3. [x] Fast build interactive interfaces (Inventory GUI)
 
-###  
+###   
 
 ### Yes, we are improving a lot of content (Wait....)
 
-1. [ ] Fast build interactive interfaces (Inventory GUI)
-2. [ ] Fast network packet capture and modification (NMS Packet)
+1. [ ] Fast network packet capture and modification (NMS Packet)
+2. [ ] Quickly generate and manage configuration files (Config)
+3. [ ] Faster player data storage (Database)
 
 ### Maven information
-* Maven Repo
-```xml
 
+* Maven Repo
+
+```xml
 <repositories>
     <repository>
         <id>jitpack.io</id>
@@ -31,13 +34,14 @@ you can use it to quickly build your Bukkit plug-in
     </repository>
 </repositories>
 ```
-* Artifact Information
-```xml
 
+* Artifact Information
+
+```xml
 <dependency>
     <groupId>com.github.xiaocheng168</groupId>
     <artifactId>Paimon</artifactId>
-    <version>tv102</version>
+    <version>tv103</version>
 </dependency>
 ```
 
