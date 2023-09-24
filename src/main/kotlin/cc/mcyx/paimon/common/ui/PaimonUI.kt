@@ -41,20 +41,43 @@ class PaimonUI(paimonUIType: PaimonUIType, head: String = "空空如也") {
             sendSetItemPacket(value.slot, value.itemStack)
         }
 
-        paimonPlayer.packetListener { it ->
+        paimonPlayer.packetListener {
             //玩家点击某个地方与按钮
             if (it.packet::class.java == CraftBukkitPacket.asNMSGamePacketClass("PacketPlayInWindowClick")) {
                 val packetPlayInWindowClick =
                     CraftBukkitPacket.asNMSGamePacketClass("PacketPlayInWindowClick").cast(it.packet)
-                CraftBukkitPacket.getObject(packetPlayInWindowClick, "ItemStack").also {
+                try {
+
+                    val guiObject = CraftBukkitPacket.getObjects(packetPlayInWindowClick, Int::class.java)
+                    guiObject.removeAt(0)
+
+                    //判断点击的界面是否为本GUI界面
+                    if (guiObject[0] != this.gid) return@packetListener
+
+                    //获取点击的物品位置
+                    val clickSlot = if (CraftBukkitPacket.serverId > 1170)
+                        CraftBukkitPacket.getObjects(
+                            packetPlayInWindowClick,
+                            Int::class.java
+                        ).asReversed()[1] as Int
+                    else
+                        CraftBukkitPacket.getObjects(
+                            packetPlayInWindowClick,
+                            Int::class.java
+                        )[1] as Int
+
                     //解析读取Item 如果是空就不解析与触发！
+                    val itemStack =
+                        CraftBukkitPacket.getObject(packetPlayInWindowClick, "ItemStack") ?: return@packetListener
+
                     CraftBukkitPacket.nmsItemToItemStack(
-                        CraftBukkitPacket.itemStack.cast(it)
+                        CraftBukkitPacket.itemStack.cast(itemStack)
                     ).apply {
                         val paimonUIClickEvent = PaimonUIClickEvent(
                             this@PaimonUI,
+                            paimonPlayer,
                             this,
-                            -1,
+                            clickSlot,
                             false
                         )
                         clickEvent?.invoke(paimonUIClickEvent)!!
@@ -68,17 +91,23 @@ class PaimonUI(paimonUIType: PaimonUIType, head: String = "空空如也") {
                         if (paimonUIClickEvent.isCancel) {
                             this@PaimonUI.update()
                         }
+
                     }
+
+                    //如果玩家关闭界面
+                    if (it.packet::class.java == CraftBukkitPacket.asNMSGamePacketClass("PacketPlayInCloseWindow")) {
+                        if (CraftBukkitPacket.getObject(it.packet, "int") == this.gid) {
+                            this.isOpen = false
+                            //回调事件用于处理
+                            this.closeEvent?.invoke(this)
+                        }
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
                 }
+
             }
-            //如果玩家关闭界面
-            if (it.packet::class.java == CraftBukkitPacket.asNMSGamePacketClass("PacketPlayInCloseWindow")) {
-                if (CraftBukkitPacket.getObject(it.packet, "int") == this.gid) {
-                    this.isOpen = false
-                    //回调事件用于处理
-                    this.closeEvent?.invoke(this)
-                }
-            }
+
         }
         return this
     }
