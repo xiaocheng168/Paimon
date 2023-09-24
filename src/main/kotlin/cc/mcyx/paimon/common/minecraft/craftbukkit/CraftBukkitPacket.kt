@@ -110,8 +110,9 @@ abstract class CraftBukkitPacket {
             head: String,
             size: Int = 9
         ): Any {
-
-            if (containers != Unit.javaClass) {
+            println(serverId)
+            //1.17+
+            if (serverId >= 1170) {
                 return if (paimonUIType == PaimonUI.PaimonUIType.ANVIL) {
                     packetPlayOutOpenWindow.getConstructor(
                         Int::class.java,
@@ -119,7 +120,33 @@ abstract class CraftBukkitPacket {
                         iChatBaseComponent,
                     ).newInstance(
                         nextContainerCounter,
-                        containers.getDeclaredField(if (serverId >= 1170) paimonUIType.v17p else paimonUIType.v14p)
+                        containers.getDeclaredField(paimonUIType.v17p)
+                            .get(containers),
+                        getChatComponentText(head)
+                    )
+                } else packetPlayOutOpenWindow.getConstructor(
+                    Int::class.java,
+                    containers,
+                    iChatBaseComponent,
+                ).newInstance(
+                    nextContainerCounter,
+                    containers.getDeclaredField(paimonUIType.v17p)
+                        .get(containers),
+                    getChatComponentText(head),
+                )
+            }
+
+            //1.14+
+            if (serverId >= 1140) {
+                return if (paimonUIType == PaimonUI.PaimonUIType.ANVIL) {
+                    packetPlayOutOpenWindow.getConstructor(
+                        Int::class.java,
+                        containers,
+                        iChatBaseComponent,
+                        Int::class.java
+                    ).newInstance(
+                        nextContainerCounter,
+                        containers.getDeclaredField(paimonUIType.v14p)
                             .get(containers),
                         getChatComponentText(head)
                     )
@@ -130,20 +157,21 @@ abstract class CraftBukkitPacket {
                     Int::class.java
                 ).newInstance(
                     nextContainerCounter,
-                    containers.getDeclaredField(if (serverId >= 1170) paimonUIType.v17p else paimonUIType.v14p)
+                    containers.getDeclaredField(paimonUIType.v14p)
                         .get(containers),
                     getChatComponentText(head),
                     size
                 )
-
             }
 
-            //anvil特殊处理
+
+            // <= 1.13
             return if (paimonUIType == PaimonUI.PaimonUIType.ANVIL) {
                 packetPlayOutOpenWindow.getConstructor(
                     Int::class.java,
                     String::class.java,
                     iChatBaseComponent,
+                    Int::class.java
                 ).newInstance(nextContainerCounter, paimonUIType.type, getChatComponentText(head))
             } else {
                 packetPlayOutOpenWindow.getConstructor(
@@ -173,7 +201,7 @@ abstract class CraftBukkitPacket {
                     .newInstance(
                         nextContainerCounter,
                         slot,
-                        0,
+                        slot,
                         bukkitItemToNMSItem(itemStack)
                     )
             }
@@ -219,6 +247,23 @@ abstract class CraftBukkitPacket {
                 }
             }
             return Unit
+        }
+
+        /**
+         * 获取一个对象中的某个类型的所有字段
+         * @param getObject 来源对象
+         * @param type 获取类型
+         * @return 返回获得到的对应的属性数据
+         */
+        fun getObjects(getObject: Any, type: Class<*>): MutableList<Any> {
+            val objects: MutableList<Any> = mutableListOf()
+            for (declaredField in getObject.javaClass.declaredFields) {
+                declaredField.isAccessible = true
+                if (declaredField.type == type) {
+                    objects.add(declaredField.get(getObject))
+                }
+            }
+            return objects
         }
     }
 }
