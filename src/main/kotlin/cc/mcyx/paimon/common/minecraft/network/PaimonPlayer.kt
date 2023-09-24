@@ -5,7 +5,6 @@ import cc.mcyx.paimon.common.ui.PaimonUI
 import io.netty.channel.Channel
 import io.netty.channel.ChannelDuplexHandler
 import io.netty.channel.ChannelHandlerContext
-import net.minecraft.network.NetworkManager
 import org.bukkit.entity.Player
 
 class PaimonPlayer(val player: Player) {
