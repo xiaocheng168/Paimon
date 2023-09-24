@@ -43,9 +43,8 @@ class PaimonUI(paimonUIType: PaimonUIType, head: String = "空空如也") {
 
         paimonPlayer.packetListener {
             //玩家点击某个地方与按钮
-            if (it.packet::class.java == CraftBukkitPacket.asNMSGamePacketClass("PacketPlayInWindowClick")) {
-                val packetPlayInWindowClick =
-                    CraftBukkitPacket.asNMSGamePacketClass("PacketPlayInWindowClick").cast(it.packet)
+            if (it.packet::class.java == CraftBukkitPacket.packetPlayInWindowClick) {
+                val packetPlayInWindowClick = CraftBukkitPacket.packetPlayInWindowClick.cast(it.packet)
                 try {
 
                     val guiObject = CraftBukkitPacket.getObjects(packetPlayInWindowClick, Int::class.java)
@@ -95,7 +94,7 @@ class PaimonUI(paimonUIType: PaimonUIType, head: String = "空空如也") {
                     }
 
                     //如果玩家关闭界面
-                    if (it.packet::class.java == CraftBukkitPacket.asNMSGamePacketClass("PacketPlayInCloseWindow")) {
+                    if (it.packet::class.java == CraftBukkitPacket.packetPlayInCloseWindow) {
                         if (CraftBukkitPacket.getObject(it.packet, "int") == this.gid) {
                             this.isOpen = false
                             //回调事件用于处理
