@@ -6,7 +6,7 @@
 
     <artifactId>Paimon</artifactId>
     <groupId>cc.mcyx</groupId>
-    <version>1.0.2-SNAPSHOT</version>
+    <version>1.0.3-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>consoleApp</name>
@@ -20,11 +20,20 @@
     <repositories>
         <repository>
             <id>mavenCentral</id>
-            <url>https://repo1.maven.org/maven2/</url>
+            <url>https://maven.aliyun.com/repository/public/</url>
         </repository>
     </repositories>
 
+
     <build>
+
+        <resources>
+            <resource>
+                <filtering>true</filtering>
+                <directory>src/main/resources</directory>
+            </resource>
+        </resources>
+
         <sourceDirectory>src/main/kotlin</sourceDirectory>
         <testSourceDirectory>src/test/kotlin</testSourceDirectory>
         <plugins>
@@ -35,7 +44,7 @@
                 <executions>
                     <execution>
                         <id>compile</id>
-                        <phase>compile</phase>
+                        <phase>process-sources</phase>
                         <goals>
                             <goal>compile</goal>
                         </goals>
@@ -96,11 +105,22 @@
         </dependency>
 
         <dependency>
+            <groupId>cn.hutool</groupId>
+            <artifactId>hutool-all</artifactId>
+            <version>5.8.16</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-all</artifactId>
+            <version>4.1.68.Final</version>
+        </dependency>
+
+
+        <dependency>
             <groupId>org.spigotmc</groupId>
             <artifactId>spigot-api</artifactId>
             <version>1.12.2-R0.1-SNAPSHOT</version>
-            <systemPath>${project.basedir}/lib/Spigot.1.12.2.jar</systemPath>
-            <scope>system</scope>
         </dependency>
 
         <dependency>
