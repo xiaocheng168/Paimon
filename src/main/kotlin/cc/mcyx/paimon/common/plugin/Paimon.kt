@@ -3,7 +3,6 @@ package cc.mcyx.paimon.common.plugin
 import cc.mcyx.paimon.common.listener.RootListener
 import cc.mcyx.paimon.common.minecraft.craftbukkit.registerListener
 import cc.mcyx.paimon.common.minecraft.craftbukkit.removePluginCommand
-import cc.mcyx.paimon.common.util.PaimonClassLoader
 import org.bukkit.plugin.java.JavaPlugin
 
 /**
