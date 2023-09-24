@@ -1,13 +1,17 @@
 package cc.mcyx.paimon.common;
 
 import cc.mcyx.paimon.common.plugin.Paimon;
+import cn.hutool.crypto.digest.MD5;
 import org.bukkit.configuration.file.YamlConfiguration;
+import sun.misc.Unsafe;
 
 import java.io.*;
-import java.lang.reflect.Method;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
+import java.lang.reflect.Field;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLClassLoader;
 import java.security.MessageDigest;
 import java.util.LinkedList;
 import java.util.List;
@@ -29,36 +33,74 @@ public class PaimonPlugin extends Paimon {
 
     public static PaimonPlugin paimonPlugin;
 
+    /**
+     * 加载Jar
+     *
+     * @param jarFile 加载的jar文件
+     */
+    public static void loadJar(File jarFile) throws Throwable {
+        Field theUnsafe = Unsafe.class.getDeclaredField("theUnsafe");
+        theUnsafe.setAccessible(true);
+        Unsafe unSafe = (Unsafe) theUnsafe.get(null);
+
+        ClassLoader classLoader = Paimon.class.getClassLoader();
+
+        Field ucp = scanUcp(Paimon.class.getClassLoader().getClass());
+        assert ucp != null;
+        Object object = unSafe.getObject(classLoader, unSafe.objectFieldOffset(ucp));
+
+        Field implLookup = MethodHandles.Lookup.class.getDeclaredField("IMPL_LOOKUP");
+        MethodHandles.Lookup lookup = (MethodHandles.Lookup) unSafe.getObject(unSafe.staticFieldBase(implLookup), unSafe.staticFieldOffset(implLookup));
+        MethodHandle addURL = lookup.findVirtual(object.getClass(), "addURL", MethodType.methodType(void.class, URL.class));
+        addURL.invoke(object, jarFile.toURI().toURL());
+    }
+
+    /**
+     * 递归扫描加载器中的ucp
+     *
+     * @param classes ClassLoader或者派生配
+     * @return ucp字段
+     */
+    protected static Field scanUcp(Class<?> classes) {
+        try {
+            return classes.getDeclaredField("ucp");
+        } catch (Exception e) {
+            Class<?> superclass = classes.getSuperclass();
+            if (superclass != Object.class) {
+                return scanUcp(superclass);
+            } else return null;
+        }
+    }
+
     static {
+        String maven = "https://maven.aliyun.com/repository/public/";
         try {
             //基础的 Kotlin 依赖
-            libs.add(new LibInfo("https://repo1.maven.org/maven2/org/jetbrains/kotlin/kotlin-stdlib-common/1.9.10/kotlin-stdlib-common-1.9.10.jar"));
-            libs.add(new LibInfo("https://repo1.maven.org/maven2/org/jetbrains/kotlin/kotlin-stdlib/1.9.10/kotlin-stdlib-1.9.10.jar"));
+            libs.add(new LibInfo(maven + "org/jetbrains/kotlin/kotlin-stdlib-common/1.9.10/kotlin-stdlib-common-1.9.10.jar"));
+            libs.add(new LibInfo(maven + "org/jetbrains/kotlin/kotlin-stdlib/1.9.10/kotlin-stdlib-1.9.10.jar"));
+            libs.add(new LibInfo(maven + "cn/hutool/hutool-all/5.8.16/hutool-all-5.8.16.jar"));
             //建立所有子文件夹
             if (libFolder.mkdirs()) {
                 System.out.println("[Paimon] create libFolder ok!");
             }
             //遍历素有需要加载的依赖
-            libs.forEach((lib) -> {
-                try {
-                    //检查依赖是否存在且可用
-                    if (!lib.check()) {
-                        //下载依赖包
-                        downloadJar(new URL(lib.getUrl()));
-                        //日志提示
-                        System.out.println("[Paimon] Downloading " + lib.url);
-                    }
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
+            for (LibInfo lib : libs) {
+                //检查依赖是否存在且可用
+                if (!lib.check()) {
+                    //下载依赖包
+                    downloadJar(new URL(lib.getUrl()));
+                    //日志提示
+                    System.out.println("[Paimon] Downloading " + lib.url);
                 }
-            });
+            }
 
             //加载所有依赖
             for (File jar : (Objects.requireNonNull(libFolder.listFiles()))) {
                 loadJar(jar);
             }
 
-        } catch (Exception e) {
+        } catch (Throwable e) {
+            System.out.println("[Paimon] " + getThisPluginName() + " error!!!!");
             e.printStackTrace();
             System.exit(0);
         }
@@ -87,7 +129,7 @@ public class PaimonPlugin extends Paimon {
         URL location = getPluginJarFile();
         try {
             JarFile jarFile = new JarFile(location.getFile());
-            JarEntry pluginYml = jarFile.getJarEntry("plugin.yml");
+            JarEntry pluginYml = jarFile.getJarEntry("src/test/plugin.yml");
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(jarFile.getInputStream(pluginYml)));
             YamlConfiguration yamlConfiguration = YamlConfiguration.loadConfiguration(bufferedReader);
             bufferedReader.close();
@@ -130,33 +172,6 @@ public class PaimonPlugin extends Paimon {
         } catch (IOException e) {
             return "";
         }
-    }
-
-    /**
-     * 加载Jar
-     *
-     * @param jarFile 加载的jar文件
-     * @throws Exception 可能会出现URL无法访问的问题
-     */
-    public static void loadJar(File jarFile) throws Exception {
-
-        Method addURL = URLClassLoader.class.getDeclaredMethod("addURL", URL.class);
-        addURL.setAccessible(true);
-        addURL.invoke(Paimon.class.getClassLoader(), jarFile.toURI().toURL());
-        addURL.setAccessible(false);
-
-   /*     URLClassLoader urlClassLoader = (URLClassLoader) ClassLoader.getSystemClassLoader();
-        JarFile jf = new JarFile(jarFile);
-        Enumeration<JarEntry> entries = jf.entries();
-        while (entries.hasMoreElements()) {
-            JarEntry jarEntry = entries.nextElement();
-            String classFile = jarEntry.getName();
-            if (classFile.endsWith(".class") && !classFile.startsWith("META-INF")) {
-                String classPath = classFile.replace("/", ".").replace(".class", "");
-                urlClassLoader.loadClass(classPath);
-            }
-        }
-        jf.close();*/
     }
 
 
@@ -237,7 +252,6 @@ public class PaimonPlugin extends Paimon {
          * 文件校验
          *
          * @return 文件是否正确
-         * @throws Exception 逃逸
          */
 
         public boolean check() throws Exception {
@@ -275,5 +289,6 @@ public class PaimonPlugin extends Paimon {
             }
             return result.toString();
         }
+
     }
 }
