@@ -3,7 +3,6 @@ package demo
 import cc.mcyx.paimon.common.PaimonPlugin
 import cc.mcyx.paimon.common.command.PaimonCommand
 import cc.mcyx.paimon.common.command.PaimonSubCommand
-import cc.mcyx.paimon.common.listener.PaimonAutoListener
 import cc.mcyx.paimon.common.minecraft.network.ProxyPlayerManager
 import cc.mcyx.paimon.common.ui.PaimonUI
 import cc.mcyx.paimon.common.minecraft.network.sendCommandHelp
@@ -11,12 +10,10 @@ import cc.mcyx.paimon.common.minecraft.network.sendMessage
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.entity.Player
-import org.bukkit.event.EventHandler
 import org.bukkit.event.inventory.InventoryType
-import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.inventory.ItemStack
 
-class TestPlugin : PaimonPlugin(), PaimonAutoListener {
+class TestPlugin : PaimonPlugin() {
     override fun onEnabled() {
         val rootCommand = PaimonCommand(this, "FastShop")
         rootCommand.description = "帮助命令"
@@ -83,12 +80,6 @@ class TestPlugin : PaimonPlugin(), PaimonAutoListener {
                 return@paimonExec true
             }
         })
-
         rootCommand.register()
-    }
-
-    @EventHandler
-    fun qwq(playerJoinEvent: PlayerJoinEvent) {
-        println(playerJoinEvent.player)
     }
 }
