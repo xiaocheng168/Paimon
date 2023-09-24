@@ -1,0 +1,7 @@
+name: Paimon
+main: demo.TestPlugin
+version: "${project.version}"
+load: STARTUP
+author: Zcc(星兮兮)
+description: paimon a bukkit framework
+website: https://github.com/xiaocheng168/Paimon
