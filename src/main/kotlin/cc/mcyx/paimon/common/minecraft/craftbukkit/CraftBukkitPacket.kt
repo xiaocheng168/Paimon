@@ -1,8 +1,11 @@
 package cc.mcyx.paimon.common.minecraft.craftbukkit
 
 import cc.mcyx.paimon.common.ui.PaimonUI
+import cn.hutool.core.util.ClassUtil
 import org.bukkit.Bukkit
 import org.bukkit.inventory.ItemStack
+import java.lang.reflect.Field
+import java.lang.reflect.Method
 
 /**
  * NMS类
@@ -18,53 +21,117 @@ abstract class CraftBukkitPacket {
         //Bukkit Packet
         private val craftBukkit: String = Bukkit.getServer().javaClass.`package`.name
         private val nmsVersion: String = craftBukkit.replace("org.bukkit.craftbukkit.", "")
-        val craftPlayer = asBukkitClass("entity.CraftPlayer")
-        val craftItemStack = asBukkitClass("inventory.CraftItemStack")
-        val craftServer = asBukkitClass("CraftServer")
-
         //NMS Packet
         val nmsPacket = if (serverId < 1170) "net.minecraft.server.$nmsVersion" else "net.minecraft"
-        val packet = asNMSClass("Packet")
-        val packetPlayOutOpenWindow = asNMSGamePacketClass("PacketPlayOutOpenWindow")
-        val packetPlayInWindowClick = asNMSGamePacketClass("PacketPlayInWindowClick")
-        val packetPlayOutSetSlot = asNMSGamePacketClass("PacketPlayOutSetSlot")
-        val chatComponentText = asNMSClass("ChatComponentText")
-        val iChatBaseComponent =
-            if (serverId < 1170) asNMSClass("IChatBaseComponent") else asNMSClass("network.chat.IChatBaseComponent")
-        val itemStack = if (serverId < 1170) asNMSClass("ItemStack") else asNMSClass("world.item.ItemStack")
+
+        val craftPlayer = asBukkitClass("CraftPlayer")
+        val craftServer = asBukkitClass("CraftServer")
+        val craftItemStack = asBukkitClass("CraftItemStack")
+
+
+        val packet = asNMSPacketClass("Packet")
+        val packetPlayOutOpenWindow = asNMSPacketClass("PacketPlayOutOpenWindow")
+        val packetPlayInWindowClick = asNMSPacketClass("PacketPlayInWindowClick")
+        val packetPlayInCloseWindow = asNMSPacketClass("PacketPlayInCloseWindow")
+        val packetPlayOutSetSlot = asNMSPacketClass("PacketPlayOutSetSlot")
+        val chatComponentText = asNMSPacketClass("ChatComponentText")
+        val iChatBaseComponent = asNMSPacketClass("IChatBaseComponent")
+        val itemStack = asNMSPacketClass("ItemStack")
 
         //这是一个1.14+=的类 低版本都没用
-        val containers = if (serverId < 1170) asNMSClass("Containers") else asNMSClass("world.inventory.Containers")
+        val containers = asNMSPacketClass("Containers")
 
         /**
-        //         * 包.类 转 Class<*>
-         *   @param classes 包.类 绝对路径
-         *   @return 返回Class<*>
+         * 获取NMS的类
+         * 扫描路径 nms 包
+         * @param className 类名
          */
-        fun asNMSClass(classes: String): Class<*> {
-            return try {
-                //如果报错了就返回Nothing类
-                Class.forName("$nmsPacket.$classes")
-            } catch (e: Exception) {
-                Unit::class.java
-            }
-        }
-
-        fun asNMSGamePacketClass(packet: String): Class<*> {
-            return if (serverId >= 1170) return asNMSClass("network.protocol.game.$packet") else this.asNMSClass(packet)
-        }
-
-        fun asNMSPacketClass(packet: String): Class<*> {
-            return if (serverId >= 1170) return asNMSClass("network.protocol.$packet") else this.asNMSClass(packet)
+        fun asNMSPacketClass(className: String): Class<*> {
+            return classNameAsClass(nmsPacket, className)
         }
 
         /**
-         * 包.类 转 Class<*>
+         *  包.类 转 Class<*>
          *   @param classes 包.类 绝对路径
          *   @return 返回Class<*>
          */
         fun asBukkitClass(classes: String): Class<*> {
-            return Class.forName("$craftBukkit.$classes")
+            return classNameAsClass(craftBukkit, classes)
+        }
+
+        /**
+         * 获取混淆类中的某个类型数据
+         * @param getObject 来源对象
+         * @param type 获取的类型
+         * @return 返回获取到的数据
+         */
+        fun getObject(getObject: Any, type: String): Any {
+            //获取高版本的 NetworkManager
+            for (declaredField in getObject.javaClass.declaredFields) {
+                if (declaredField.type.toString().endsWith(type)) {
+                    declaredField.isAccessible = true
+                    return declaredField.get(getObject)
+                }
+            }
+            return Unit
+        }
+
+        /**
+         * 获取一个对象中的某个类型的所有字段
+         * @param getObject 来源对象
+         * @param type 获取类型
+         * @return 返回获得到的对应的属性数据
+         */
+        fun getObjects(getObject: Any, type: Class<*>): MutableList<Any> {
+            val objects: MutableList<Any> = mutableListOf()
+            for (declaredField in getObject.javaClass.declaredFields) {
+                declaredField.isAccessible = true
+                if (declaredField.type == type) {
+                    objects.add(declaredField.get(getObject))
+                }
+            }
+            return objects
+        }
+
+        /**
+         * 扫描某个包下的指定类 如果存在返回Class 反之返回 Unit
+         * @param `package` 扫描的包路径 列如扫描nms玩家数据包 可以这样 net.minecraft
+         * @param className 类名 Class Name
+         * @return 返回对应的Class类 如果没用找到返回 Any(Object)
+         */
+        fun classNameAsClass(`package`: String, className: String): Class<*> {
+            val `class` = ClassUtil.scanPackage(`package`).filter { it.simpleName == className }
+            if (`class`.isNotEmpty()) {
+                return `class`[0]
+            }
+            return Unit::class.java
+        }
+
+
+        /**
+         * 通过返回类型、参数来获取一个类中的方法
+         * @param clazz 获得的对象
+         * @param rClass 返回类型
+         * @param pClass 方法参数类型
+         * @return 方法
+         */
+        fun getClassMethod(forClass: Class<*>, rClass: Class<*>, vararg pClass: Class<*>): Method? {
+            //遍历此类的所有方法
+            for (method in forClass.declaredMethods) {
+                val parameterTypes = method.parameterTypes
+                //正确了几个
+                var successSize = 0
+                if (parameterTypes.size == pClass.size) {
+                    for ((index, clazz) in pClass.withIndex()) {
+                        if (parameterTypes[index] == clazz) successSize++
+                    }
+                    //循环完判断是否正确数量完整
+                    if (parameterTypes.size == successSize) {
+                        return method
+                    }
+                }
+            }
+            return null
         }
 
         /**
@@ -78,16 +145,16 @@ abstract class CraftBukkitPacket {
                 val aClass: Class<*>
                 if (serverId >= 1190) {
                     //>= 1.19
-                    aClass = Class.forName("net.minecraft.network.chat.IChatBaseComponent")
+                    aClass = asNMSPacketClass("IChatBaseComponent")
                     val a = aClass.getMethod("a", String::class.java)
                     return a.invoke(aClass, str)
                 }
                 aClass = if (serverId >= 1180) {
                     //>= 1.17
-                    Class.forName("net.minecraft.network.chat.ChatComponentText")
+                    chatComponentText
                 } else {
                     // < 1.17
-                    asNMSClass("ChatComponentText")
+                    chatComponentText
                 }
                 val constructor = aClass.getConstructor(String::class.java)
                 constructor.newInstance(str)
@@ -110,7 +177,6 @@ abstract class CraftBukkitPacket {
             head: String,
             size: Int = 9
         ): Any {
-            println(serverId)
             //1.17+
             if (serverId >= 1170) {
                 return if (paimonUIType == PaimonUI.PaimonUIType.ANVIL) {
@@ -163,7 +229,6 @@ abstract class CraftBukkitPacket {
                     size
                 )
             }
-
 
             // <= 1.13
             return if (paimonUIType == PaimonUI.PaimonUIType.ANVIL) {
@@ -229,41 +294,6 @@ abstract class CraftBukkitPacket {
         fun bukkitItemToNMSItem(bkItem: ItemStack): Any {
             return craftItemStack.getDeclaredMethod("asNMSCopy", ItemStack::class.java)
                 .invoke(craftItemStack, bkItem)
-        }
-
-
-        /**
-         * 获取混淆类中的某个类型数据
-         * @param getObject 来源对象
-         * @param type 获取的类型
-         * @return 返回获取到的数据
-         */
-        fun getObject(getObject: Any, type: String): Any {
-            //获取高版本的 NetworkManager
-            for (declaredField in getObject.javaClass.declaredFields) {
-                if (declaredField.type.toString().endsWith(type)) {
-                    declaredField.isAccessible = true
-                    return declaredField.get(getObject)
-                }
-            }
-            return Unit
-        }
-
-        /**
-         * 获取一个对象中的某个类型的所有字段
-         * @param getObject 来源对象
-         * @param type 获取类型
-         * @return 返回获得到的对应的属性数据
-         */
-        fun getObjects(getObject: Any, type: Class<*>): MutableList<Any> {
-            val objects: MutableList<Any> = mutableListOf()
-            for (declaredField in getObject.javaClass.declaredFields) {
-                declaredField.isAccessible = true
-                if (declaredField.type == type) {
-                    objects.add(declaredField.get(getObject))
-                }
-            }
-            return objects
         }
     }
 }
