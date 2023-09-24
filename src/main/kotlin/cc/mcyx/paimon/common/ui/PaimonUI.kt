@@ -9,7 +9,7 @@ import kotlin.math.min
 class PaimonUI(paimonUIType: PaimonUIType, head: String = "空空如也") {
     var paimonPlayer: PaimonPlayer? = null
     private var gid = 0
-    private val buttons: HashMap<ItemStack, ButtonInfo> = hashMapOf()
+    private val buttons: HashMap<Int, ButtonInfo> = hashMapOf()
 
     var head: String
     var paimonUIType: PaimonUIType
@@ -45,66 +45,60 @@ class PaimonUI(paimonUIType: PaimonUIType, head: String = "空空如也") {
             //玩家点击某个地方与按钮
             if (it.packet::class.java == CraftBukkitPacket.packetPlayInWindowClick) {
                 val packetPlayInWindowClick = CraftBukkitPacket.packetPlayInWindowClick.cast(it.packet)
-                try {
+                val guiObject = CraftBukkitPacket.getObjects(packetPlayInWindowClick, Int::class.java)
+                guiObject.removeAt(0)
 
-                    val guiObject = CraftBukkitPacket.getObjects(packetPlayInWindowClick, Int::class.java)
-                    guiObject.removeAt(0)
+                //判断点击的界面是否为本GUI界面
+                if (guiObject[0] != this.gid) return@packetListener
 
-                    //判断点击的界面是否为本GUI界面
-                    if (guiObject[0] != this.gid) return@packetListener
+                //获取点击的物品位置
+                val clickSlot = if (CraftBukkitPacket.serverId > 1170)
+                    CraftBukkitPacket.getObjects(
+                        packetPlayInWindowClick,
+                        Int::class.java
+                    ).asReversed()[1] as Int
+                else
+                    CraftBukkitPacket.getObjects(
+                        packetPlayInWindowClick,
+                        Int::class.java
+                    )[1] as Int
 
-                    //获取点击的物品位置
-                    val clickSlot = if (CraftBukkitPacket.serverId > 1170)
-                        CraftBukkitPacket.getObjects(
-                            packetPlayInWindowClick,
-                            Int::class.java
-                        ).asReversed()[1] as Int
-                    else
-                        CraftBukkitPacket.getObjects(
-                            packetPlayInWindowClick,
-                            Int::class.java
-                        )[1] as Int
+                //解析读取Item 如果是空就不解析与触发！
+                val itemStack =
+                    CraftBukkitPacket.getObject(packetPlayInWindowClick, "ItemStack") ?: return@packetListener
 
-                    //解析读取Item 如果是空就不解析与触发！
-                    val itemStack =
-                        CraftBukkitPacket.getObject(packetPlayInWindowClick, "ItemStack") ?: return@packetListener
-
-                    CraftBukkitPacket.nmsItemToItemStack(
-                        CraftBukkitPacket.itemStack.cast(itemStack)
-                    ).apply {
-                        val paimonUIClickEvent = PaimonUIClickEvent(
-                            this@PaimonUI,
-                            paimonPlayer,
-                            this,
-                            clickSlot,
-                            false
-                        )
-                        clickEvent?.invoke(paimonUIClickEvent)!!
-                        //如果取消了将刷新界面
-                        if (paimonUIClickEvent.isCancel) {
-                            this@PaimonUI.update()
-                        }
-                        //触发按钮独立事件
-                        buttons[this]?.callback?.invoke(paimonUIClickEvent)
-                        //如果取消了将刷新界面
-                        if (paimonUIClickEvent.isCancel) {
-                            this@PaimonUI.update()
-                        }
-
+                CraftBukkitPacket.nmsItemToItemStack(
+                    CraftBukkitPacket.itemStack.cast(itemStack)
+                ).apply {
+                    val paimonUIClickEvent = PaimonUIClickEvent(
+                        this@PaimonUI,
+                        paimonPlayer,
+                        this,
+                        clickSlot,
+                        false
+                    )
+                    clickEvent?.invoke(paimonUIClickEvent)
+                    //如果取消了将刷新界面
+                    if (paimonUIClickEvent.isCancel) {
+                        this@PaimonUI.update()
                     }
 
-                    //如果玩家关闭界面
-                    if (it.packet::class.java == CraftBukkitPacket.packetPlayInCloseWindow) {
-                        if (CraftBukkitPacket.getObject(it.packet, "int") == this.gid) {
-                            this.isOpen = false
-                            //回调事件用于处理
-                            this.closeEvent?.invoke(this)
-                        }
+                    buttons[clickSlot]?.callback?.invoke(paimonUIClickEvent)
+                    //如果取消了将刷新界面
+                    if (paimonUIClickEvent.isCancel) {
+                        this@PaimonUI.update()
                     }
-                } catch (e: Exception) {
-                    e.printStackTrace()
+
                 }
+            }
 
+            //如果玩家关闭界面
+            if (it.packet::class.java == CraftBukkitPacket.packetPlayInCloseWindow) {
+                if (CraftBukkitPacket.getObject(it.packet, "int") == this.gid) {
+                    this.isOpen = false
+                    //回调事件用于处理
+                    this.closeEvent?.invoke(this)
+                }
             }
 
         }
@@ -146,7 +140,7 @@ class PaimonUI(paimonUIType: PaimonUIType, head: String = "空空如也") {
         //设置回调函数
         this.itemClickEvent = itemClick
         //设置该物品的点击事件
-        buttons[itemStack] = ButtonInfo(itemStack, slot, itemClick)
+        buttons[slot] = ButtonInfo(itemStack, slot, itemClick)
         //发送设置物品包
         sendSetItemPacket(slot, itemStack)
         return this
@@ -161,7 +155,7 @@ class PaimonUI(paimonUIType: PaimonUIType, head: String = "空空如也") {
         paimonPlayer?.sendPacket(
             CraftBukkitPacket.createSlotItemPacket(
                 gid,
-                min(slot, this.paimonUIType.size - 1),
+                slot,
                 itemStack
             )
         )
