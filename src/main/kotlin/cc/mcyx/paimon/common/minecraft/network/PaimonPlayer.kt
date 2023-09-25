@@ -10,20 +10,20 @@ import org.bukkit.entity.Player
 class PaimonPlayer(val player: Player) {
 
     //EntityPlayer 对象
-    private val entityPlayer: Any =
+    val entityPlayer: Any =
         CraftBukkitPacket.craftPlayer.getDeclaredMethod("getHandle").invoke(player)
 
     //PlayerConnection 玩家连接
-    private val connection: Any = CraftBukkitPacket.getObject(entityPlayer, "PlayerConnection")
+    val connection: Any = CraftBukkitPacket.getObject(entityPlayer, "PlayerConnection")
 
     //Network 网络类
-    private val network: Any = CraftBukkitPacket.getObject(connection, "NetworkManager")
+    val network: Any = CraftBukkitPacket.getObject(connection, "NetworkManager")
 
     //NIO Channel通道对象
-    private val channel: Channel = CraftBukkitPacket.getObject(network, "Channel") as Channel
+    val channel: Channel = CraftBukkitPacket.getObject(network, "Channel") as Channel
 
     //发包方法
-    private val sendPacketMethod =
+    val sendPacketMethod =
         CraftBukkitPacket.getClassMethod(connection::class.java, Void::class.java, CraftBukkitPacket.packet)
 
     //数据包处理对象
