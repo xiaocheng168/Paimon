@@ -1,6 +1,6 @@
 package cc.mcyx.paimon.common.listener
 
-import cc.mcyx.paimon.common.minecraft.network.ProxyPlayerManager
+import cc.mcyx.paimon.common.minecraft.network.PaimonPlayerManager
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.player.PlayerJoinEvent
@@ -11,6 +11,6 @@ class RootListener : PaimonAutoListener {
         ignoreCancelled = true
     )
     fun joinEvent(e: PlayerJoinEvent) {
-        ProxyPlayerManager.addPaimonPlayer(e.player)
+        PaimonPlayerManager.addPaimonPlayer(e.player)
     }
 }
