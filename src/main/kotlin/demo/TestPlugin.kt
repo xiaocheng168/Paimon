@@ -31,11 +31,15 @@ class TestPlugin : PaimonPlugin() {
                         val paimonPlayer = PaimonPlayerManager.getPaimonPlayer(sender)
                         val paimonUI = PaimonUI(PaimonUI.PaimonUIType.ANVIL).open(paimonPlayer)
                         //单独对这个按钮做操作
-                        paimonUI.setItem(2, ItemStack(Material.APPLE)) {
-                            it.isCancel = true
+                        paimonUI.setItem(0, ItemStack(Material.APPLE)) {
+                            println(it.slot)
                         }
                         //取消界面所有点击
-                        paimonUI.clickEvent { it.isCancel = true }
+                        paimonUI.clickEvent {
+                            if (it.slot == 2) {
+                                paimonPlayer.closeUI(0)
+                            }
+                        }
                     }
                     return@paimonExec true
                 }
