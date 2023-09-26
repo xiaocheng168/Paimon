@@ -13,8 +13,8 @@ import org.bukkit.inventory.ItemStack
  */
 open class PaimonUI(paimonUIType: PaimonUIType, head: String = "空空如也") {
     var paimonPlayer: PaimonPlayer? = null
-    private var gid = 0
-    private val buttons: HashMap<Int, ButtonInfo> = hashMapOf()
+    var gid = 0
+    val buttons: HashMap<Int, ButtonInfo> = hashMapOf()
 
     var head: String
     var paimonUIType: PaimonUIType
@@ -27,11 +27,21 @@ open class PaimonUI(paimonUIType: PaimonUIType, head: String = "空空如也") {
     }
 
     /**
+     * 关闭用户目前正在打开的界面
+     * @param paimonPlayer 被关闭的玩家
+     * @return 返回关闭的界面
+     */
+    fun close(paimonPlayer: PaimonPlayer): PaimonUI {
+        paimonPlayer.closeUI(this.gid)
+        return this
+    }
+
+    /**
      * 给一个代理玩家打开UI界面
      * @param paimonPlayer 代理玩家
      * @return 返回界面类
      */
-    open fun open(paimonPlayer: PaimonPlayer): PaimonUI {
+    fun open(paimonPlayer: PaimonPlayer): PaimonUI {
 
         this.paimonPlayer = paimonPlayer
         this.gid = paimonPlayer.nextContainerCounter()
@@ -73,38 +83,42 @@ open class PaimonUI(paimonUIType: PaimonUIType, head: String = "空空如也") {
                         Int::class.java
                     )[1] as Int
 
-                //解析读取Item 如果是空就不解析与触发！
-                val itemStack =
-                    CraftBukkitPacket.getObject(packetPlayInWindowClick, "ItemStack")
-
-                CraftBukkitPacket.nmsItemToItemStack(
-                    CraftBukkitPacket.itemStack.cast(itemStack)
-                ).apply {
-                    val paimonUIClickEvent = PaimonUIClickEvent(
-                        this@PaimonUI,
-                        paimonPlayer,
-                        this,
-                        clickSlot,
-                        false
+                //解析读取Item，如果出现错误将返回Item.AIR
+                val itemStack: ItemStack = try {
+                    CraftBukkitPacket.nmsItemToItemStack(
+                        CraftBukkitPacket.itemStack.cast(
+                            CraftBukkitPacket.getObject(
+                                packetPlayInWindowClick,
+                                "ItemStack"
+                            )
+                        )
                     )
-                    try {
-                        clickEvent?.invoke(paimonUIClickEvent)
-                        //如果取消了将刷新界面
-                        if (paimonUIClickEvent.isCancel) {
-                            this@PaimonUI.update()
-                        }
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                    }
-                    try {
-                        buttons[clickSlot]?.callback?.invoke(paimonUIClickEvent)
-                        //如果取消了将刷新界面
-                        if (paimonUIClickEvent.isCancel) {
-                            this@PaimonUI.update()
-                        }
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                    }
+                } catch (e: Exception) {
+                    ItemStack(Material.AIR)
+                }
+                //构建事件
+                val paimonUIClickEvent = PaimonUIClickEvent(
+                    this,
+                    paimonPlayer,
+                    itemStack,
+                    clickSlot,
+                    false
+                )
+                //传递点击事件
+                try {
+                    clickEvent?.invoke(paimonUIClickEvent)
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+                //传递点击指定物品事件
+                try {
+                    buttons[clickSlot]?.callback?.invoke(paimonUIClickEvent)
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+                //如果取消了将刷新界面
+                if (paimonUIClickEvent.isCancel) {
+                    this.update()
                 }
             }
 
@@ -125,7 +139,7 @@ open class PaimonUI(paimonUIType: PaimonUIType, head: String = "空空如也") {
      * 更新交互界面
      * 界面必须处于打开界面才可继续更新交互界面
      */
-    open fun update() {
+    fun update() {
         if (isOpen)
             if (this.paimonPlayer != null) {
                 //更新玩家背包
@@ -152,7 +166,7 @@ open class PaimonUI(paimonUIType: PaimonUIType, head: String = "空空如也") {
         this.clickEvent = e
     }
 
-    open fun setItem(slot: Int, itemStack: ItemStack, itemClick: ((PaimonUIClickEvent) -> Unit)? = null): PaimonUI {
+    fun setItem(slot: Int, itemStack: ItemStack, itemClick: ((PaimonUIClickEvent) -> Unit)? = null): PaimonUI {
         //设置回调函数
         this.itemClickEvent = itemClick
         //设置该物品的点击事件
