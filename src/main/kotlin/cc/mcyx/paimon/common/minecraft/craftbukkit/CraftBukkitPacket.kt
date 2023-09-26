@@ -31,6 +31,7 @@ abstract class CraftBukkitPacket {
 
         val packet = asNMSPacketClass("Packet")
         val packetPlayOutOpenWindow = asNMSPacketClass("PacketPlayOutOpenWindow")
+        val packetPlayOutCloseWindow = asNMSPacketClass("PacketPlayOutCloseWindow")
         val packetPlayInWindowClick = asNMSPacketClass("PacketPlayInWindowClick")
         val packetPlayInCloseWindow = asNMSPacketClass("PacketPlayInCloseWindow")
         val packetPlayOutSetSlot = asNMSPacketClass("PacketPlayOutSetSlot")
