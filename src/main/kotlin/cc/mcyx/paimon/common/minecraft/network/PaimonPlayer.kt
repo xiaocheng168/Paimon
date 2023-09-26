@@ -95,4 +95,14 @@ class PaimonPlayer(val player: Player) {
     fun openUI(paimonUI: PaimonUI) {
         paimonUI.open(this)
     }
+
+    /**
+     * 关闭玩家目前正在查看的界面
+     */
+    fun closeUI(gid: Int) {
+        sendPacket(
+            CraftBukkitPacket.packetPlayOutCloseWindow.getConstructor(Int::class.java)
+                .newInstance(gid)
+        )
+    }
 }
