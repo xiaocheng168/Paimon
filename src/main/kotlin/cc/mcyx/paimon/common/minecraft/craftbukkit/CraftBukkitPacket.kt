@@ -4,7 +4,6 @@ import cc.mcyx.paimon.common.ui.PaimonUI
 import cn.hutool.core.util.ClassUtil
 import org.bukkit.Bukkit
 import org.bukkit.inventory.ItemStack
-import java.lang.reflect.Field
 import java.lang.reflect.Method
 
 /**
@@ -21,6 +20,7 @@ abstract class CraftBukkitPacket {
         //Bukkit Packet
         private val craftBukkit: String = Bukkit.getServer().javaClass.`package`.name
         private val nmsVersion: String = craftBukkit.replace("org.bukkit.craftbukkit.", "")
+
         //NMS Packet
         val nmsPacket = if (serverId < 1170) "net.minecraft.server.$nmsVersion" else "net.minecraft"
 
@@ -39,13 +39,14 @@ abstract class CraftBukkitPacket {
         val itemStack = asNMSPacketClass("ItemStack")
 
         //这是一个1.14+=的类 低版本都没用
-        val containers = asNMSPacketClass("Containers")
+        val containers = if (serverId < 1140) Unit::class.java else asNMSPacketClass("Containers")
 
         /**
          * 获取NMS的类
          * 扫描路径 nms 包
          * @param className 类名
          */
+
         fun asNMSPacketClass(className: String): Class<*> {
             return classNameAsClass(nmsPacket, className)
         }
@@ -57,6 +58,24 @@ abstract class CraftBukkitPacket {
          */
         fun asBukkitClass(classes: String): Class<*> {
             return classNameAsClass(craftBukkit, classes)
+        }
+
+        /**
+         * 获取混淆类中的某个类型数据
+         * @param c 哪个类
+         * @param getObject 来源对象
+         * @param type 获取的类型
+         * @return 返回获取到的数据
+         */
+        fun getObject(c: Class<*>, getObject: Any, type: String): Any {
+            //获取高版本的 NetworkManager
+            for (declaredField in c.declaredFields) {
+                if (declaredField.type.toString().endsWith(type)) {
+                    declaredField.isAccessible = true
+                    return declaredField.get(getObject)
+                }
+            }
+            return Unit
         }
 
         /**
@@ -99,18 +118,26 @@ abstract class CraftBukkitPacket {
          * @param className 类名 Class Name
          * @return 返回对应的Class类 如果没用找到返回 Any(Object)
          */
+        @Synchronized
         fun classNameAsClass(`package`: String, className: String): Class<*> {
-            val `class` = ClassUtil.scanPackage(`package`).filter { it.simpleName == className }
-            if (`class`.isNotEmpty()) {
-                return `class`[0]
+            val clazzs = ClassUtil.scanPackage(`package`).filter {
+                try {
+                    it.name.endsWith(".$className")
+                } catch (e: Exception) {
+                    throw RuntimeException("无法找到对应类 类名 $className 查找包路径 $`package`")
+                }
             }
+            if (clazzs.isNotEmpty()) {
+                return clazzs[0]
+            }
+            println("[Paimon!!!] 无法找到对应类 类名 $className 查找包路径 $`package`")
             return Unit::class.java
         }
 
 
         /**
          * 通过返回类型、参数来获取一个类中的方法
-         * @param clazz 获得的对象
+         * @param forClass 获得的对象
          * @param rClass 返回类型
          * @param pClass 方法参数类型
          * @return 方法
@@ -235,8 +262,7 @@ abstract class CraftBukkitPacket {
                 packetPlayOutOpenWindow.getConstructor(
                     Int::class.java,
                     String::class.java,
-                    iChatBaseComponent,
-                    Int::class.java
+                    iChatBaseComponent
                 ).newInstance(nextContainerCounter, paimonUIType.type, getChatComponentText(head))
             } else {
                 packetPlayOutOpenWindow.getConstructor(

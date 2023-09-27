@@ -5,6 +5,6 @@ package cc.mcyx.paimon.common.minecraft.network
  * @param packet Packet数据包
  * @param isCancel 是否拦截数据吧
  */
-class Packet(
+class PaimonPacket(
     val packet: Any, var isCancel: Boolean
 )

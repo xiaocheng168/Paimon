@@ -3,7 +3,7 @@ package cc.mcyx.paimon.common.minecraft.network
 
 import org.bukkit.entity.Player
 
-abstract class ProxyPlayerManager {
+abstract class PaimonPlayerManager {
 
     companion object {
         //代理玩家表

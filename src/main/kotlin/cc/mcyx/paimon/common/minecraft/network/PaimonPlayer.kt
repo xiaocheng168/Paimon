@@ -7,6 +7,10 @@ import io.netty.channel.ChannelDuplexHandler
 import io.netty.channel.ChannelHandlerContext
 import org.bukkit.entity.Player
 
+/**
+ * 代理玩家
+ * @param player 玩家类
+ */
 class PaimonPlayer(val player: Player) {
 
     //EntityPlayer 对象
@@ -31,10 +35,10 @@ class PaimonPlayer(val player: Player) {
         override fun channelRead(ctx: ChannelHandlerContext?, msg: Any?) {
             //数据包不能为null 且是否拦截数据包
             if (msg != null) {
-                val packet = Packet(msg, false)
-                packetListener?.invoke(packet)
+                val paimonPacket = PaimonPacket(msg, false)
+                packetListener?.invoke(paimonPacket)
                 //是否不拦截数据包
-                if (!packet.isCancel) super.channelRead(ctx, msg)
+                if (!paimonPacket.isCancel) super.channelRead(ctx, msg)
             }
         }
     }
@@ -58,14 +62,14 @@ class PaimonPlayer(val player: Player) {
 
 
     //数据包回调对象
-    private var packetListener: ((Packet) -> Unit)? = null
+    private var packetListener: ((PaimonPacket) -> Unit)? = null
 
     /**
      * 数据包回调函数
      * @param packetListener
      * @return 数据对象本身
      */
-    fun packetListener(packetListener: ((Packet) -> Unit)?): PaimonPlayer {
+    fun packetListener(packetListener: ((PaimonPacket) -> Unit)?): PaimonPlayer {
         this.packetListener = packetListener
         return this
     }
@@ -78,23 +82,8 @@ class PaimonPlayer(val player: Player) {
         packet.javaClass.also {
             //判断发送的是否为 Packet 数据包
             if (it.interfaces.contains(CraftBukkitPacket.packet)) {
-                for (genericInterface in it.genericInterfaces) {
-                    if (genericInterface.toString().endsWith(".PacketListenerPlayOut>")) {
-                        //查找对应的发包方法
-                        for (declaredMethod in connection.javaClass.declaredMethods) {
-                            //判断该方法是否为发包方法
-                            if (declaredMethod.parameterTypes.size == 1 &&
-                                declaredMethod.parameterTypes[0] == CraftBukkitPacket.packet
-                            ) {
-                                //发送数据包
-                                sendPacketMethod?.invoke(connection, packet)
-                                return@also
-                            }
-                        }
-
-                    }
-                }
-                throw RuntimeException("Packet not is a Packet<PacketListenerPlayOut> type")
+                //发送数据包
+                sendPacketMethod?.invoke(connection, packet)
             } else throw RuntimeException("Packet not is a Packet<T> type")
         }
     }

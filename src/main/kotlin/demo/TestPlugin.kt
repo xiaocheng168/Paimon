@@ -3,6 +3,8 @@ package demo
 import cc.mcyx.paimon.common.PaimonPlugin
 import cc.mcyx.paimon.common.command.PaimonCommand
 import cc.mcyx.paimon.common.command.PaimonSubCommand
+import cc.mcyx.paimon.common.minecraft.network.PaimonPlayerManager
+import cc.mcyx.paimon.common.minecraft.network.PaimonSender
 import cc.mcyx.paimon.common.minecraft.craftbukkit.CraftBukkitPacket
 import cc.mcyx.paimon.common.minecraft.network.ProxyPlayerManager
 import cc.mcyx.paimon.common.ui.PaimonUI
@@ -20,7 +22,7 @@ class TestPlugin : PaimonPlugin() {
         val rootCommand = PaimonCommand(this, "FastShop")
         rootCommand.description = "帮助命令"
         rootCommand.paimonExec { sender, _, _ ->
-            sendCommandHelp(sender, rootCommand)
+            PaimonSender.sendCommandHelp(sender, rootCommand)
             return@paimonExec true
         }
         rootCommand.addSubCommand(
@@ -36,7 +38,7 @@ class TestPlugin : PaimonPlugin() {
 
                 it.paimonExec { sender, command, args ->
                     if (sender is Player) {
-                        val paimonPlayer = ProxyPlayerManager.getPaimonPlayer(sender)
+                        val paimonPlayer = PaimonPlayerManager.getPaimonPlayer(sender)
                         val paimonUI = PaimonUI(PaimonUI.PaimonUIType.ANVIL).open(paimonPlayer)
                         //单独对这个按钮做操作
                         paimonUI.setItem(2, ItemStack(Material.APPLE)) {
@@ -68,23 +70,24 @@ class TestPlugin : PaimonPlugin() {
                                 sender.openInventory(newGui)
                             }
                         } catch (e: Exception) {
-                            sendMessage(sender, "打不来嘞类型 ${args[args.size - 1]}")
+                            PaimonSender.sendMessage(sender, "打不来嘞类型 ${args[args.size - 1]}")
                         }
                         return@paimonExec true
                     }
                 )
             })
 
-        rootCommand.addSubCommand(PaimonSubCommand(
-            paimon = this,
-            command = "send"
-        ).also {
-            it.description = "发送一条消息"
-            it.paimonExec { sender, _, _ ->
-                sendMessage(sender, "发了哦！")
-                return@paimonExec true
-            }
-        })
+        rootCommand.addSubCommand(
+            PaimonSubCommand(
+                paimon = this,
+                command = "send"
+            ).also {
+                it.description = "发送一条消息"
+                it.paimonExec { sender, _, _ ->
+                    PaimonSender.sendMessage(sender, "发了哦！")
+                    return@paimonExec true
+                }
+            })
         rootCommand.register()
     }
 }
