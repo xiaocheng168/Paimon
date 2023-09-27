@@ -47,6 +47,7 @@ public class Sign {
                 Constructor<?> constructor = PacketPlayOutTileEntityData.getDeclaredConstructor(BlockPosition, TileEntityTypes, NBTTagCompound);
                 constructor.setAccessible(true);
 
+                //NBT
                 String s = String.format("{front_text:{messages:['{\"text\":\"%s\"}','{\"text\":\"%s\"}','{\"text\":\"%s\"}','{\"text\":\"%s\"}']}}", texts[0], texts[1], texts[2], texts[3]);
                 Object packetSignTextData = MojangsonParser.getMethod("a", String.class).invoke(MojangsonParser, s);
 
