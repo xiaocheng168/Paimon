@@ -60,6 +60,10 @@ public class Sign {
                 Object AIR = Blocks.getField("a").get(Blocks);
                 bc = PacketPlayOutBlockChange.getConstructor(BlockPosition, IBlockData).newInstance(bp, AIR.getClass().getMethod("n").invoke(AIR));
                 paimonPlayer.sendPacket(bc);
+
+                AIR = Blocks.getField("a").get(Blocks);
+                bc = PacketPlayOutBlockChange.getConstructor(BlockPosition, IBlockData).newInstance(bp, AIR.getClass().getMethod("n").invoke(AIR));
+                paimonPlayer.sendPacket(bc);
             }  else if (CraftBukkitPacket.Companion.getServerId() == 1165) {
                 //创建坐标数据包
                 Block block = player.getLocation().getBlock();
@@ -89,6 +93,11 @@ public class Sign {
 
                 //打开牌子数据包
                 paimonPlayer.sendPacket(PacketPlayOutOpenSignEditor.getConstructor(BlockPosition).newInstance(bp));
+
+                //移除牌子数据包
+                Object AIR = Blocks.getField("AIR").get(Blocks);
+                bc.getClass().getField("block").set(bc, AIR.getClass().getMethod("getBlockData").invoke(AIR));
+                paimonPlayer.sendPacket(bc);
             } else {
                 //创建坐标数据包
                 Object world = CraftWorld.cast(player.getWorld());

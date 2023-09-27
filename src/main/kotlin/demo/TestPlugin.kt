@@ -25,7 +25,7 @@ class TestPlugin : PaimonPlugin() {
         }
         rootCommand.addSubCommand(
             PaimonCommand(this, "sign").paimonExec { sender, command, args ->
-            Sign.openSign(sender as Player, arrayOf("1", "2", "3","4"))
+            Sign.openSign(sender as Player, arrayOf("文本1", "文本2", "文本3","文本4"))
             return@paimonExec true
         })
         rootCommand.addSubCommand(
