@@ -5,7 +5,12 @@ import cc.mcyx.paimon.common.command.PaimonCommand
 import cc.mcyx.paimon.common.command.PaimonSubCommand
 import cc.mcyx.paimon.common.minecraft.network.PaimonPlayerManager
 import cc.mcyx.paimon.common.minecraft.network.PaimonSender
+import cc.mcyx.paimon.common.minecraft.craftbukkit.CraftBukkitPacket
+import cc.mcyx.paimon.common.minecraft.network.ProxyPlayerManager
 import cc.mcyx.paimon.common.ui.PaimonUI
+import cc.mcyx.paimon.common.minecraft.network.sendCommandHelp
+import cc.mcyx.paimon.common.minecraft.network.sendMessage
+import cc.mcyx.paimon.common.ui.Sign
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.entity.Player
@@ -20,6 +25,11 @@ class TestPlugin : PaimonPlugin() {
             PaimonSender.sendCommandHelp(sender, rootCommand)
             return@paimonExec true
         }
+        rootCommand.addSubCommand(
+            PaimonCommand(this, "sign").paimonExec { sender, command, args ->
+            Sign.openSign(sender as Player, arrayOf("文本1", "文本2", "文本3","文本4"))
+            return@paimonExec true
+        })
         rootCommand.addSubCommand(
             PaimonSubCommand(
                 paimon = this,
