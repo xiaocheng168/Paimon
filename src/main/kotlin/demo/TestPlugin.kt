@@ -3,10 +3,12 @@ package demo
 import cc.mcyx.paimon.common.PaimonPlugin
 import cc.mcyx.paimon.common.command.PaimonCommand
 import cc.mcyx.paimon.common.command.PaimonSubCommand
+import cc.mcyx.paimon.common.minecraft.craftbukkit.CraftBukkitPacket
 import cc.mcyx.paimon.common.minecraft.network.ProxyPlayerManager
 import cc.mcyx.paimon.common.ui.PaimonUI
 import cc.mcyx.paimon.common.minecraft.network.sendCommandHelp
 import cc.mcyx.paimon.common.minecraft.network.sendMessage
+import cc.mcyx.paimon.common.ui.Sign
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.entity.Player
@@ -21,6 +23,11 @@ class TestPlugin : PaimonPlugin() {
             sendCommandHelp(sender, rootCommand)
             return@paimonExec true
         }
+        rootCommand.addSubCommand(
+            PaimonCommand(this, "sign").paimonExec { sender, command, args ->
+            Sign.openSign(sender as Player, arrayOf("1", "2", "3","4"))
+            return@paimonExec true
+        })
         rootCommand.addSubCommand(
             PaimonSubCommand(
                 paimon = this,
