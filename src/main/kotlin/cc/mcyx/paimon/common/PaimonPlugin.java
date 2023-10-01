@@ -80,6 +80,10 @@ public class PaimonPlugin extends Paimon {
             libs.add(new LibInfo(maven + "org/jetbrains/kotlin/kotlin-stdlib/1.9.10/kotlin-stdlib-1.9.10.jar"));
             //Hutool 工具库
             libs.add(new LibInfo(maven + "cn/hutool/hutool-all/5.8.16/hutool-all-5.8.16.jar"));
+            //MYSQL
+            libs.add(new LibInfo(maven + "mysql/mysql-connector-java/8.0.28/mysql-connector-java-8.0.28.jar"));
+            //SQLITE
+            libs.add(new LibInfo(maven + "org/xerial/sqlite-jdbc/3.43.0.0/sqlite-jdbc-3.43.0.0.jar"));
             //建立所有子文件夹
             if (libFolder.mkdirs()) {
                 System.out.println("[Paimon] create libFolder ok!");
