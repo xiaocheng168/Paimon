@@ -1,5 +1,6 @@
 package cc.mcyx.paimon.common;
 
+import cc.mcyx.paimon.api.Metrics;
 import cc.mcyx.paimon.common.plugin.Paimon;
 import org.bukkit.configuration.file.YamlConfiguration;
 import sun.misc.Unsafe;
@@ -107,6 +108,7 @@ public class PaimonPlugin extends Paimon {
 
     {
         paimonPlugin = this;
+        new Metrics(this, 19935).addCustomChart(new Metrics.SimplePie("Paimon", () -> "PaimonFramework"));
     }
 
     /**
