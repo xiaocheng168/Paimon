@@ -1,7 +1,11 @@
 package cc.mcyx.paimon.common.minecraft.network
 
 import cc.mcyx.paimon.common.command.PaimonCommand
+import cc.mcyx.paimon.common.minecraft.craftbukkit.CraftBukkitPacket
+import net.md_5.bungee.api.ChatMessageType
+import net.md_5.bungee.api.chat.TextComponent
 import org.bukkit.command.CommandSender
+import org.bukkit.entity.Player
 
 /**
  *  信息发送者
@@ -17,6 +21,19 @@ class PaimonSender {
          */
         fun sendMessage(sender: CommandSender, msg: String) {
             sender.sendMessage(msg)
+        }
+
+        /**
+         * 发送System Bar 该方法仅限1.8+
+         * @param player 玩家
+         * @param msg 发送内容
+         */
+        fun sendActionBar(player: Player, msg: String) {
+            if (CraftBukkitPacket.serverId >= 180) {
+                player.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent(msg))
+            } else {
+                throw UnsupportedClassVersionError("the version unsupported! 1.8+")
+            }
         }
 
         /**
