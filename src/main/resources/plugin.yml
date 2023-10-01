@@ -1,5 +1,5 @@
 name: Paimon
-main: demo.TestPlugin
+main: cc.mcyx.paimon.lib.PaimonLib
 version: "${project.version}"
 load: STARTUP
 author: Zcc(星兮兮)
