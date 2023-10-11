@@ -13,10 +13,13 @@ val autoRegisterListenerList: MutableList<PaimonAutoListener> = mutableListOf()
  */
 fun registerListener(paimonAutoListener: PaimonAutoListener) {
     paimonAutoListener.also {
-        try {
-            Bukkit.getPluginManager().registerEvents(it, PaimonPlugin.paimonPlugin)
-            autoRegisterListenerList.add(it)
-        } catch (_: Exception) {
+        if (PaimonPlugin.paimonPlugin.isEnabled) {
+            try {
+                Bukkit.getPluginManager().registerEvents(it, PaimonPlugin.paimonPlugin)
+                autoRegisterListenerList.add(it)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
     }
 }
