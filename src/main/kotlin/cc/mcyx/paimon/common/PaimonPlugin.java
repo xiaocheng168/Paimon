@@ -94,6 +94,7 @@ public class PaimonPlugin extends Paimon {
                 if (!lib.check()) {
                     //下载依赖包
                     downloadJar(new URL(lib.getUrl()));
+                    downloadJar(new URL(lib.getUrl() + ".md5"));
                     //日志提示
                     System.out.println("[Paimon] Downloading " + lib.url);
                 }
@@ -233,7 +234,7 @@ public class PaimonPlugin extends Paimon {
         //下载地址
         private final String url;
         //校验数据
-        private final String md5;
+        private String md5 = "";
 
         /**
          * 依赖信息类
@@ -242,7 +243,14 @@ public class PaimonPlugin extends Paimon {
          */
         public LibInfo(String url) {
             this.url = url;
-            this.md5 = getHttpContent(this.url + ".md5");
+            byte[] bytes = new byte[32];
+            try {
+                FileInputStream fileInputStream = new FileInputStream(new File(libFolder, urlToFileName(this.url)) + ".md5");
+                int readLine = fileInputStream.read(bytes);
+                this.md5 = new String(bytes, 0, readLine);
+                fileInputStream.close();
+            } catch (Exception ignored) {
+            }
         }
 
         public String getUrl() {
