@@ -1,5 +1,6 @@
 package cc.mcyx.paimon.common.minecraft.network
 
+import cc.mcyx.paimon.common.PaimonPlugin
 import cc.mcyx.paimon.common.minecraft.craftbukkit.CraftBukkitPacket
 import cc.mcyx.paimon.common.ui.PaimonUI
 import io.netty.channel.Channel
@@ -8,23 +9,36 @@ import io.netty.channel.ChannelHandlerContext
 import org.bukkit.entity.Player
 
 /**
- * 代理玩家
+ * 代理玩家 Bukkit 代理玩家
  * @param player 玩家类
  */
 class PaimonPlayer(val player: Player) {
 
     //EntityPlayer 对象
-    val entityPlayer: Any =
-        CraftBukkitPacket.craftPlayer.getDeclaredMethod("getHandle").invoke(player)
+    val entityPlayer = CraftBukkitPacket.craftPlayer.getDeclaredMethod("getHandle").invoke(player)
 
     //PlayerConnection 玩家连接
-    val connection: Any = CraftBukkitPacket.getObject(entityPlayer, "PlayerConnection")
+    val connection = if (PaimonPlugin.isForge())
+        CraftBukkitPacket.getObject(
+            CraftBukkitPacket.getObject(
+                entityPlayer,
+                "NetHandlerPlayServer"
+            ), "NetworkDispatcher"
+        )
+    else
+        CraftBukkitPacket.getObject(entityPlayer, "PlayerConnection")
 
     //Network 网络类
-    val network: Any = CraftBukkitPacket.getObject(connection, "NetworkManager")
+    val network = if (PaimonPlugin.isForge())
+        CraftBukkitPacket.getObject(
+            connection,
+            "NetworkManager"
+        )
+    else
+        CraftBukkitPacket.getObject(connection, "NetworkManager")
 
     //NIO Channel通道对象
-    val channel: Channel = CraftBukkitPacket.getObject(network, "Channel") as Channel
+    val channel = CraftBukkitPacket.getObject(network, "Channel")
 
     //发包方法
     val sendPacketMethod =
@@ -47,12 +61,12 @@ class PaimonPlayer(val player: Player) {
         //代理玩家初始化
         try {
             //尝试删除该玩家的通道
-            channel.pipeline().remove(player.name)
+            (channel as Channel).pipeline().remove(player.name)
             //报错代表不存在将添加通道用于监听收到的数据包Packet<*>
             channel.pipeline().addBefore("packet_handler", player.name, packetHandler)
         } catch (e: Exception) {
             //报错代表不存在将添加通道用于监听收到的数据包Packet<*>
-            channel.pipeline().addBefore("packet_handler", player.name, packetHandler)
+            (channel as Channel).pipeline().addBefore("packet_handler", player.name, packetHandler)
         }
     }
 
