@@ -27,6 +27,11 @@
             <id>spigot-repo</id>
             <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
         </repository>
+
+        <repository>
+            <id>forge</id>
+            <url>https://nexus.velocitypowered.com/repository/maven-public/</url>
+        </repository>
     </repositories>
 
 
@@ -147,6 +152,15 @@
             <systemPath>${project.basedir}/lib/nms-all-1.0.0.jar</systemPath>
             <scope>system</scope>
         </dependency>
+
+        <dependency>
+            <groupId>net.minecraftforge</groupId>
+            <artifactId>forge</artifactId>
+            <version>1.12.2-14.23.5.2860</version>
+            <systemPath>${project.basedir}/lib/forge-1.12.2-14.23.5.2860-mdk.jar</systemPath>
+            <scope>system</scope>
+        </dependency>
+
     </dependencies>
 
 </project>
