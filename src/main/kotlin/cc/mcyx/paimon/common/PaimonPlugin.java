@@ -226,6 +226,19 @@ public class PaimonPlugin extends Paimon {
         return fileSplit[fileSplit.length - 1];
     }
 
+    /**
+     * 服务端是否为 Forge 类型
+     * @return 是否为 Forge
+     */
+    public static boolean isForge() {
+        try {
+            Class.forName("net.minecraftforge.client.MinecraftForgeClient");
+            return true;
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
+    }
+
 
     /**
      * 依赖信息类
