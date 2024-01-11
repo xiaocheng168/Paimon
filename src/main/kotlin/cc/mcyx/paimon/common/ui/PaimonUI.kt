@@ -4,6 +4,7 @@ import cc.mcyx.paimon.common.minecraft.craftbukkit.CraftBukkitPacket
 import cc.mcyx.paimon.common.minecraft.network.PaimonPlayer
 import cc.mcyx.paimon.common.ui.event.PaimonUIClickEvent
 import org.bukkit.Material
+import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 
 /**
@@ -201,13 +202,20 @@ open class PaimonUI(paimonUIType: PaimonUIType, head: String = "空空如也") {
      */
     enum class PaimonUIType(val type: String, val size: Int, val v14p: String, val v17p: String) {
         CHEST_9("minecraft:chest", 9, "GENERIC_9X1", "a"),
-        CHEST_18("minecraft:chest", 18, "GENERIC_9X2", "a"),
-        CHEST_24("minecraft:chest", 24, "GENERIC_9X3", "a"),
-        CHEST_36("minecraft:chest", 36, "GENERIC_9X4", "a"),
-        CHEST_48("minecraft:chest", 48, "GENERIC_9X5", "a"),
-        CHEST_56("minecraft:chest", 56, "GENERIC_9X6", "a"),
+        CHEST_18("minecraft:chest", 18, "GENERIC_9X2", "b"),
+        CHEST_24("minecraft:chest", 24, "GENERIC_9X3", "c"),
+        CHEST_36("minecraft:chest", 36, "GENERIC_9X4", "d"),
+        CHEST_48("minecraft:chest", 48, "GENERIC_9X5", "e"),
+        CHEST_56("minecraft:chest", 56, "GENERIC_9X6", "f"),
         HOPPER("minecraft:hopper", 5, "HOPPER", "p"),
         ANVIL("minecraft:anvil", 2, "ANVIL", "h"),
     }
 
+    /**
+     * 打开一个PaimonUI界面
+     * @param player Bukkit 玩家
+     */
+    fun open(player: Player): PaimonUI {
+        return this.open(PaimonPlayer(player))
+    }
 }
