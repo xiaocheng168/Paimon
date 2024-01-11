@@ -1,7 +1,10 @@
 package cc.mcyx.paimon.common;
 
 import cc.mcyx.paimon.api.Metrics;
+import cc.mcyx.paimon.common.command.PaimonCommand;
 import cc.mcyx.paimon.common.plugin.Paimon;
+import kotlin.jvm.functions.Function3;
+import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.YamlConfiguration;
 import sun.misc.Unsafe;
 
@@ -228,6 +231,7 @@ public class PaimonPlugin extends Paimon {
 
     /**
      * 服务端是否为 Forge 类型
+     *
      * @return 是否为 Forge
      */
     public static boolean isForge() {
@@ -243,7 +247,7 @@ public class PaimonPlugin extends Paimon {
     /**
      * 依赖信息类
      */
-    static class LibInfo {
+    public static class LibInfo {
         //下载地址
         private final String url;
         //校验数据
