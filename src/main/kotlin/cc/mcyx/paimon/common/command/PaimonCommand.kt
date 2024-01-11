@@ -1,6 +1,7 @@
 package cc.mcyx.paimon.common.command
 
 import cc.mcyx.paimon.common.minecraft.craftbukkit.registerCommand
+import cc.mcyx.paimon.common.minecraft.network.PaimonSender
 import cc.mcyx.paimon.common.plugin.Paimon
 import org.bukkit.command.Command
 import org.bukkit.command.CommandSender
@@ -10,18 +11,44 @@ import org.bukkit.command.CommandSender
  * 命令批处理类
  * @param paimon 插件主体
  * @param command 命令头
- * @param permissionNode 权限节点
+ * @param parentCommand 父命令
  */
-open class PaimonCommand(val paimon: Paimon, val command: String, private val permissionNode: String = "") :
+open class PaimonCommand(
+    val paimon: Paimon,
+    val command: String,
+    val parentCommand: PaimonCommand? = null
+) :
     Command(command) {
 
+    companion object {
+        /**
+         * 获取当前命令的默认权限节点
+         */
+        fun getRoot(paimonCommand: PaimonCommand): String {
+            if (paimonCommand.parentCommand == null) {
+                return paimonCommand.name
+            }
+            return "${getRoot(paimonCommand.parentCommand)}.${paimonCommand.name}"
+        }
+
+        /**
+         * 某个对象是否拥有此权限系欸但
+         *
+         * @return 返回权限是否存在
+         */
+        fun hasPermission(sender: CommandSender, paimonCommand: PaimonCommand): Boolean {
+            return sender.hasPermission(paimonCommand.permission)
+        }
+
+    }
+
     init {
-        if (this.permissionNode != "") this.permission = permissionNode
+        permission = getRoot(this)
+        permissionMessage = "§c你没有权限使用该命, 缺少权限 $permission"
     }
 
     //子命令
     val subCommand: HashMap<String, PaimonCommand> = LinkedHashMap()
-
 
     final override fun execute(p0: CommandSender, p1: String, p2: Array<out String>): Boolean {
         //循环所有命令参数表
@@ -43,7 +70,8 @@ open class PaimonCommand(val paimon: Paimon, val command: String, private val pe
     final override fun tabComplete(sender: CommandSender, alias: String, args: Array<out String>): MutableList<String> {
         val tabCommand = mutableListOf<String>()
         if (args.size < 2) {
-            tabCommand.addAll(subCommand.keys)
+            //权限拦截
+            subCommand.forEach { if (hasPermission(sender, it.value)) tabCommand.add(it.key) }
             tabCommand.addAll(this.paimonTab(sender, command, args))
             return tabCommand.filter { it.lowercase().startsWith(args[args.size - 1].lowercase()) }.toMutableList()
         }
@@ -69,6 +97,7 @@ open class PaimonCommand(val paimon: Paimon, val command: String, private val pe
         return tabCommand.filter { it.startsWith(args[args.size - 1]) }.toMutableList()
     }
 
+
     /**
      * 命令执行触发方法
      * @param sender 发送着
@@ -77,6 +106,11 @@ open class PaimonCommand(val paimon: Paimon, val command: String, private val pe
      * @return 返回命令是否执行有效
      */
     private fun paimonExec(sender: CommandSender, command: String, args: Array<out String>): Boolean {
+        //处理权限判断
+        if (!hasPermission(sender, this)) {
+            PaimonSender.sendMessage(sender, permissionMessage)
+            return false
+        }
         return paimonExec?.invoke(sender, command, args) ?: return false
     }
 
