@@ -89,7 +89,8 @@ open class PaimonCommand(
         }
 
         //如果都没有表示到达命令当前位置，默认给予当前命令所有子命令
-        tabCommand.addAll(subCommand.keys)
+        if (args[args.size - 2] != "")
+            subCommand.forEach { if (hasPermission(sender, it.value)) tabCommand.add(it.key) }
         //给与命令Tab处理反应 且结尾必须是空的 或者目前子命令为当前批处理对象
         if (args[args.size - 1] == "" || args[args.size - 2] == this.command) {
             tabCommand.addAll(this.paimonTab(sender, command, args))
