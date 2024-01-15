@@ -32,6 +32,11 @@
             <id>forge</id>
             <url>https://nexus.velocitypowered.com/repository/maven-public/</url>
         </repository>
+
+        <repository>
+            <id>iridiumdevelopment</id>
+            <url>https://nexus.iridiumdevelopment.net/repository/maven-releases/</url>
+        </repository>
     </repositories>
 
 
@@ -142,6 +147,12 @@
             <groupId>org.spigotmc</groupId>
             <artifactId>spigot-api</artifactId>
             <version>1.12.2-R0.1-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.iridium</groupId>
+            <artifactId>IridiumColorAPI</artifactId>
+            <version>LATEST</version>
         </dependency>
 
 
