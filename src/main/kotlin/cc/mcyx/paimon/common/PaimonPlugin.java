@@ -1,6 +1,5 @@
 package cc.mcyx.paimon.common;
 
-import cc.mcyx.paimon.api.Metrics;
 import cc.mcyx.paimon.common.plugin.Paimon;
 import org.bukkit.configuration.file.YamlConfiguration;
 import sun.misc.Unsafe;
@@ -118,14 +117,22 @@ public class PaimonPlugin extends Paimon {
             }
         } catch (Throwable e) {
             System.err.printf("[Paimon!!!!] LoadPlugin [%s] Error!!!!\n", getThisPluginName());
-            e.printStackTrace();
             System.exit(0);
         }
     }
 
     {
         paimonPlugin = this;
-        new Metrics(this, 19935).addCustomChart(new Metrics.SimplePie("Paimon", () -> "PaimonFramework"));
+    }
+
+
+    /**
+     * 得到 PaimonPlugin 实例
+     *
+     * @return PaimonPlugin
+     */
+    public static Paimon getPaimonPlugin() {
+        return getPlugin(PaimonPlugin.class);
     }
 
     /**
@@ -165,33 +172,6 @@ public class PaimonPlugin extends Paimon {
     public static URL getPluginJarFile() {
         return PaimonPlugin.class.getProtectionDomain().getCodeSource().getLocation();
     }
-
-    /**
-     * 请求简单的HTTP页面
-     *
-     * @param url 路径
-     * @return 页面内容
-     */
-    public static String getHttpContent(String url) {
-
-        try {
-            HttpURLConnection urlConnection = (HttpURLConnection) new URL(url).openConnection();
-            urlConnection.setConnectTimeout(3000);
-            int ready;
-            byte[] bytes = new byte[10240];
-            StringBuilder stringBuilder = new StringBuilder();
-            InputStream inputStream = urlConnection.getInputStream();
-            //获取页面内容
-            while ((ready = inputStream.read(bytes)) != -1) {
-                stringBuilder.append(new String(bytes, 0, ready));
-            }
-            //返回页面内容
-            return stringBuilder.toString();
-        } catch (IOException e) {
-            return "";
-        }
-    }
-
 
     /**
      * 下载某个Jar路径到Paimon/lib
