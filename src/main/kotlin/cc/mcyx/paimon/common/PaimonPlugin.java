@@ -1,10 +1,7 @@
 package cc.mcyx.paimon.common;
 
 import cc.mcyx.paimon.api.Metrics;
-import cc.mcyx.paimon.common.command.PaimonCommand;
 import cc.mcyx.paimon.common.plugin.Paimon;
-import kotlin.jvm.functions.Function3;
-import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.YamlConfiguration;
 import sun.misc.Unsafe;
 
@@ -75,22 +72,34 @@ public class PaimonPlugin extends Paimon {
         }
     }
 
+    public static final String ALIYUN_MAVEN = "https://maven.aliyun.com/repository/public/";
+    public static final String IRD_MAVEN = "https://nexus.iridiumdevelopment.net/repository/maven-releases/";
+
+    /**
+     * 增加依赖
+     *
+     * @param path  Maven 文件路径
+     * @param maven Maven 仓库
+     */
+    public static void addLibURL(String path, String maven) {
+        libs.add(new LibInfo(maven + path));
+    }
+
     static {
-        String maven = "https://maven.aliyun.com/repository/public/";
         try {
             //基础的 Kotlin 依赖
-            libs.add(new LibInfo(maven + "org/jetbrains/kotlin/kotlin-stdlib-common/1.9.10/kotlin-stdlib-common-1.9.10.jar"));
-            libs.add(new LibInfo(maven + "org/jetbrains/kotlin/kotlin-stdlib/1.9.10/kotlin-stdlib-1.9.10.jar"));
-            //Hutool 工具库
-            libs.add(new LibInfo(maven + "cn/hutool/hutool-all/5.8.16/hutool-all-5.8.16.jar"));
-            //MYSQL
-            libs.add(new LibInfo(maven + "mysql/mysql-connector-java/8.0.28/mysql-connector-java-8.0.28.jar"));
-            //SQLITE
-            libs.add(new LibInfo(maven + "org/xerial/sqlite-jdbc/3.43.0.0/sqlite-jdbc-3.43.0.0.jar"));
+            addLibURL("org/jetbrains/kotlin/kotlin-stdlib-common/1.9.10/kotlin-stdlib-common-1.9.10.jar", ALIYUN_MAVEN);
+            addLibURL("org/jetbrains/kotlin/kotlin-stdlib/1.9.10/kotlin-stdlib-1.9.10.jar", ALIYUN_MAVEN);
+            addLibURL("cn/hutool/hutool-all/5.8.16/hutool-all-5.8.16.jar", ALIYUN_MAVEN);
+            addLibURL("mysql/mysql-connector-java/8.0.28/mysql-connector-java-8.0.28.jar", ALIYUN_MAVEN);
+            addLibURL("org/xerial/sqlite-jdbc/3.43.0.0/sqlite-jdbc-3.43.0.0.jar", ALIYUN_MAVEN);
+            addLibURL("com/iridium/IridiumColorAPI/1.0.8/IridiumColorAPI-1.0.8.jar", IRD_MAVEN);
+
             //建立所有子文件夹
             if (libFolder.mkdirs()) {
                 System.out.println("[Paimon] create libFolder ok!");
             }
+
             //遍历素有需要加载的依赖
             for (LibInfo lib : libs) {
                 //检查依赖是否存在且可用
