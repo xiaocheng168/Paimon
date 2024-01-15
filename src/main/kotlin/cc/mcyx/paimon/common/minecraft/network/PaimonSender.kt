@@ -2,6 +2,7 @@ package cc.mcyx.paimon.common.minecraft.network
 
 import cc.mcyx.paimon.common.command.PaimonCommand
 import cc.mcyx.paimon.common.minecraft.craftbukkit.CraftBukkitPacket
+import com.iridium.iridiumcolorapi.IridiumColorAPI
 import net.md_5.bungee.api.ChatMessageType
 import net.md_5.bungee.api.chat.TextComponent
 import org.bukkit.command.CommandSender
@@ -20,7 +21,7 @@ class PaimonSender {
          * @param msg 消息内容
          */
         fun sendMessage(sender: CommandSender, msg: String) {
-            sender.sendMessage(msg)
+            sender.sendMessage(IridiumColorAPI.process(msg))
         }
 
         /**
@@ -30,7 +31,7 @@ class PaimonSender {
          */
         fun sendActionBar(player: Player, msg: String) {
             if (CraftBukkitPacket.serverId >= 180) {
-                player.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent(msg))
+                player.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent(IridiumColorAPI.process(msg)))
             } else {
                 throw UnsupportedClassVersionError("the version unsupported! 1.8+")
             }
