@@ -89,9 +89,11 @@ public class PaimonPlugin extends Paimon {
             //基础的 Kotlin 依赖
             addLibURL("org/jetbrains/kotlin/kotlin-stdlib-common/1.9.10/kotlin-stdlib-common-1.9.10.jar", ALIYUN_MAVEN);
             addLibURL("org/jetbrains/kotlin/kotlin-stdlib/1.9.10/kotlin-stdlib-1.9.10.jar", ALIYUN_MAVEN);
+            addLibURL("org/jetbrains/kotlin/kotlin-reflect/1.9.10/kotlin-reflect-1.9.10.jar", ALIYUN_MAVEN);
             addLibURL("cn/hutool/hutool-all/5.8.16/hutool-all-5.8.16.jar", ALIYUN_MAVEN);
             addLibURL("mysql/mysql-connector-java/8.0.28/mysql-connector-java-8.0.28.jar", ALIYUN_MAVEN);
             addLibURL("org/xerial/sqlite-jdbc/3.43.0.0/sqlite-jdbc-3.43.0.0.jar", ALIYUN_MAVEN);
+            addLibURL("org/ktorm/ktorm-core/3.6.0/ktorm-core-3.6.0.jar", ALIYUN_MAVEN);
             addLibURL("com/iridium/IridiumColorAPI/1.0.8/IridiumColorAPI-1.0.8.jar", IRD_MAVEN);
 
             //建立所有子文件夹
