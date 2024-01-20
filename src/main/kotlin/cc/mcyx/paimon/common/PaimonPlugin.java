@@ -1,7 +1,6 @@
 package cc.mcyx.paimon.common;
 
 import cc.mcyx.paimon.common.plugin.Paimon;
-import org.bukkit.configuration.file.YamlConfiguration;
 import sun.misc.Unsafe;
 
 import java.io.*;
@@ -90,7 +89,7 @@ public class PaimonPlugin extends Paimon {
             addLibURL("org/jetbrains/kotlin/kotlin-stdlib-common/1.9.10/kotlin-stdlib-common-1.9.10.jar", ALIYUN_MAVEN);
             addLibURL("org/jetbrains/kotlin/kotlin-stdlib/1.9.10/kotlin-stdlib-1.9.10.jar", ALIYUN_MAVEN);
             addLibURL("org/jetbrains/kotlin/kotlin-reflect/1.9.10/kotlin-reflect-1.9.10.jar", ALIYUN_MAVEN);
-            addLibURL("cn/hutool/hutool-all/5.8.16/hutool-all-5.8.16.jar", ALIYUN_MAVEN);
+            addLibURL("cn/hutool/hutool-all/5.8.25/hutool-all-5.8.25.jar", ALIYUN_MAVEN);
             addLibURL("mysql/mysql-connector-java/8.0.28/mysql-connector-java-8.0.28.jar", ALIYUN_MAVEN);
             addLibURL("org/xerial/sqlite-jdbc/3.43.0.0/sqlite-jdbc-3.43.0.0.jar", ALIYUN_MAVEN);
             addLibURL("org/ktorm/ktorm-core/3.6.0/ktorm-core-3.6.0.jar", ALIYUN_MAVEN);
@@ -152,13 +151,13 @@ public class PaimonPlugin extends Paimon {
      *
      * @return 返回Bukkit Yaml配置处理类
      */
-    public static YamlConfiguration getPluginYmlConfig() {
+    public static org.bukkit.configuration.file.YamlConfiguration getPluginYmlConfig() {
         URL location = getPluginJarFile();
         try {
             JarFile jarFile = new JarFile(location.getFile());
             JarEntry pluginYml = jarFile.getJarEntry("plugin.yml");
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(jarFile.getInputStream(pluginYml)));
-            YamlConfiguration yamlConfiguration = YamlConfiguration.loadConfiguration(bufferedReader);
+            org.bukkit.configuration.file.YamlConfiguration yamlConfiguration = org.bukkit.configuration.file.YamlConfiguration.loadConfiguration(bufferedReader);
             bufferedReader.close();
             return yamlConfiguration;
         } catch (IOException e) {
