@@ -93,6 +93,7 @@ public class PaimonPlugin extends Paimon {
             addLibURL("mysql/mysql-connector-java/8.0.28/mysql-connector-java-8.0.28.jar", ALIYUN_MAVEN);
             addLibURL("org/xerial/sqlite-jdbc/3.43.0.0/sqlite-jdbc-3.43.0.0.jar", ALIYUN_MAVEN);
             addLibURL("org/ktorm/ktorm-core/3.6.0/ktorm-core-3.6.0.jar", ALIYUN_MAVEN);
+            addLibURL("com/google/zxing/core/3.3.3/core-3.3.3.jar", ALIYUN_MAVEN);
             addLibURL("com/iridium/IridiumColorAPI/1.0.8/IridiumColorAPI-1.0.8.jar", IRD_MAVEN);
 
             //建立所有子文件夹
