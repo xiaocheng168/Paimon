@@ -85,6 +85,7 @@ public class PaimonPlugin extends Paimon {
 
     static {
         try {
+            System.out.println("LoadPaimonLibrary...");
             //基础的 Kotlin 依赖
             addLibURL("org/jetbrains/kotlin/kotlin-stdlib-common/1.9.10/kotlin-stdlib-common-1.9.10.jar", ALIYUN_MAVEN);
             addLibURL("org/jetbrains/kotlin/kotlin-stdlib/1.9.10/kotlin-stdlib-1.9.10.jar", ALIYUN_MAVEN);
@@ -118,8 +119,7 @@ public class PaimonPlugin extends Paimon {
                 loadJar(jar);
             }
         } catch (Throwable e) {
-            System.err.printf("[Paimon!!!!] LoadPlugin [%s] Error!!!!\n", getThisPluginName());
-            System.exit(0);
+            e.printStackTrace();
         }
     }
 
