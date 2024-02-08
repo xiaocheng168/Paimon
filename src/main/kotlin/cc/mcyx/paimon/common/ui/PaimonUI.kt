@@ -23,7 +23,7 @@ open class PaimonUI(paimonUIType: PaimonUIType, head: String = "空空如也") {
     var isOpen: Boolean = false
 
     init {
-        this.head = head
+        this.head = head.replace("&","§")
         this.paimonUIType = paimonUIType
     }
 
