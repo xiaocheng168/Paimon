@@ -23,7 +23,7 @@ open class PaimonUI(paimonUIType: PaimonUIType, head: String = "空空如也") {
     var isOpen: Boolean = false
 
     init {
-        this.head = head.replace("&","§")
+        this.head = head
         this.paimonUIType = paimonUIType
     }
 
@@ -52,7 +52,7 @@ open class PaimonUI(paimonUIType: PaimonUIType, head: String = "空空如也") {
             CraftBukkitPacket.createGUIPacket(
                 this.gid,
                 this.paimonUIType,
-                this.head,
+                this.head.replace("&","§"),
                 this.paimonUIType.size
             )
         )
