@@ -133,6 +133,7 @@ open class PaimonUI(paimonUIType: PaimonUIType, head: String = "空空如也") {
             }
 
         }
+        this.openEvent?.invoke(this) //玩家打开界面
         return this
     }
 
@@ -152,6 +153,8 @@ open class PaimonUI(paimonUIType: PaimonUIType, head: String = "空空如也") {
 
     //关闭界面事件
     private var closeEvent: ((PaimonUI) -> Unit)? = null
+    //打开界面
+    private var openEvent: ((PaimonUI) -> Unit)? = null
 
     //点击事件 点击事件为界面所有地方点击反馈 它的优先级大于 > itemClickEvent
     private var clickEvent: ((PaimonUIClickEvent) -> Unit)? = null
@@ -161,6 +164,10 @@ open class PaimonUI(paimonUIType: PaimonUIType, head: String = "空空如也") {
 
     fun closeEvent(e: (PaimonUI) -> Unit) {
         this.closeEvent = e
+    }
+
+    fun openEvent(e: (PaimonUI) -> Unit) {
+        this.openEvent = e
     }
 
     fun clickEvent(e: (PaimonUIClickEvent) -> Unit) {
