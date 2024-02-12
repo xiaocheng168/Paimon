@@ -1,6 +1,7 @@
 package cc.mcyx.paimon.common.plugin
 
 import cc.mcyx.paimon.common.listener.RootListener
+import cc.mcyx.paimon.common.minecraft.craftbukkit.CraftBukkitPacket
 import cc.mcyx.paimon.common.minecraft.craftbukkit.registerListener
 import cc.mcyx.paimon.common.minecraft.craftbukkit.removePluginCommand
 import org.bukkit.plugin.java.JavaPlugin
@@ -26,6 +27,13 @@ abstract class Paimon : JavaPlugin() {
     final override fun onDisable() {
         removePluginCommand(this)
         this.onDisabled()
+    }
+
+    /**
+     * 返回服务器数字版本
+     */
+    fun getServerId(): Int {
+        return CraftBukkitPacket.serverId
     }
 
     /**
