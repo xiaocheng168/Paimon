@@ -95,6 +95,7 @@ abstract class CraftBukkitPacket {
             }
             return Unit
         }
+
         /**
          * 获取混淆类中的某个类型数据
          * @param getObject 来源对象
@@ -117,7 +118,7 @@ abstract class CraftBukkitPacket {
          * @param type 获取的类型
          * @return 返回获取到的数据
          */
-        fun getStaticObject(c: Class<*>, getObject: Any,type: String): Any {
+        fun getStaticObject(c: Class<*>, getObject: Any, type: String): Any {
             for (declaredField in c.declaredFields) {
                 if (declaredField.type.toString().endsWith(type)) {
                     return c.getDeclaredField(declaredField.name).apply { isAccessible = true }.get(getObject)
@@ -235,73 +236,80 @@ abstract class CraftBukkitPacket {
             head: String,
             size: Int = 9
         ): Any {
-            //1.17+
-            if (serverId >= 1170) {
-                return if (paimonUIType == PaimonUI.PaimonUIType.ANVIL) {
-                    packetPlayOutOpenWindow.getConstructor(
-                        Int::class.java,
-                        containers,
-                        iChatBaseComponent,
-                    ).newInstance(
-                        nextContainerCounter,
-                        containers.getDeclaredField(paimonUIType.v17p)
-                            .get(containers),
-                        getChatComponentText(head)
-                    )
-                } else packetPlayOutOpenWindow.getConstructor(
-                    Int::class.java,
-                    containers,
-                    iChatBaseComponent,
-                ).newInstance(
-                    nextContainerCounter,
-                    containers.getDeclaredField(paimonUIType.v17p)
-                        .get(containers),
-                    getChatComponentText(head),
-                )
-            }
+            when (paimonUIType) {
+                // 铁砧特殊处理
+                PaimonUI.PaimonUIType.ANVIL -> {
+                    if (serverId >= 1170) {
+                        return packetPlayOutOpenWindow.getConstructor(
+                            Int::class.java,
+                            containers,
+                            iChatBaseComponent,
+                        ).newInstance(
+                            nextContainerCounter,
+                            containers.getDeclaredField(paimonUIType.v17p)
+                                .get(containers),
+                            getChatComponentText(head)
+                        )
+                    }
 
-            //1.14+
-            if (serverId >= 1140) {
-                return if (paimonUIType == PaimonUI.PaimonUIType.ANVIL) {
-                    packetPlayOutOpenWindow.getConstructor(
+                    if (serverId >= 1140) {
+                        return packetPlayOutOpenWindow.getConstructor(
+                            Int::class.java,
+                            containers,
+                            iChatBaseComponent,
+                            Int::class.java
+                        ).newInstance(
+                            nextContainerCounter,
+                            containers.getDeclaredField(paimonUIType.v14p)
+                                .get(containers),
+                            getChatComponentText(head)
+                        )
+                    }
+
+                    //<= 1.13
+                    return packetPlayOutOpenWindow.getConstructor(
                         Int::class.java,
-                        containers,
+                        String::class.java,
+                        iChatBaseComponent
+                    ).newInstance(nextContainerCounter, paimonUIType.type, getChatComponentText(head))
+                }
+
+                else -> {
+                    if (serverId >= 1170) {
+                        return packetPlayOutOpenWindow.getConstructor(
+                            Int::class.java,
+                            containers,
+                            iChatBaseComponent,
+                        ).newInstance(
+                            nextContainerCounter,
+                            containers.getDeclaredField(paimonUIType.v17p)
+                                .get(containers),
+                            getChatComponentText(head)
+                        )
+                    }
+
+                    if (serverId >= 1140) {
+                        return packetPlayOutOpenWindow.getConstructor(
+                            Int::class.java,
+                            containers,
+                            iChatBaseComponent,
+                            Int::class.java
+                        ).newInstance(
+                            nextContainerCounter,
+                            containers.getDeclaredField(paimonUIType.v14p)
+                                .get(containers),
+                            getChatComponentText(head)
+                        )
+                    }
+
+                    //<= 1.13
+                    return packetPlayOutOpenWindow.getConstructor(
+                        Int::class.java,
+                        String::class.java,
                         iChatBaseComponent,
                         Int::class.java
-                    ).newInstance(
-                        nextContainerCounter,
-                        containers.getDeclaredField(paimonUIType.v14p)
-                            .get(containers),
-                        getChatComponentText(head)
-                    )
-                } else packetPlayOutOpenWindow.getConstructor(
-                    Int::class.java,
-                    containers,
-                    iChatBaseComponent,
-                    Int::class.java
-                ).newInstance(
-                    nextContainerCounter,
-                    containers.getDeclaredField(paimonUIType.v14p)
-                        .get(containers),
-                    getChatComponentText(head),
-                    size
-                )
-            }
-
-            // <= 1.13
-            return if (paimonUIType == PaimonUI.PaimonUIType.ANVIL) {
-                packetPlayOutOpenWindow.getConstructor(
-                    Int::class.java,
-                    String::class.java,
-                    iChatBaseComponent
-                ).newInstance(nextContainerCounter, paimonUIType.type, getChatComponentText(head))
-            } else {
-                packetPlayOutOpenWindow.getConstructor(
-                    Int::class.java,
-                    String::class.java,
-                    iChatBaseComponent,
-                    Int::class.java
-                ).newInstance(nextContainerCounter, paimonUIType.type, getChatComponentText(head), size)
+                    ).newInstance(nextContainerCounter, paimonUIType.type, getChatComponentText(head), size)
+                }
             }
         }
 
