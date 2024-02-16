@@ -1,6 +1,7 @@
 package cc.mcyx.paimon.common;
 
 import cc.mcyx.paimon.common.plugin.Paimon;
+import cc.mcyx.paimon.util.Metrics;
 import sun.misc.Unsafe;
 
 import java.io.*;
@@ -234,6 +235,15 @@ public class PaimonPlugin extends Paimon {
         }
     }
 
+    /**
+     * bStats 统计API
+     *
+     * @param pluginId bStats Plugin Id
+     * @return 返回BStatus统计Api
+     */
+    public Metrics callBStats(Integer pluginId) {
+        return new Metrics(this, pluginId);
+    }
 
     /**
      * 依赖信息类
