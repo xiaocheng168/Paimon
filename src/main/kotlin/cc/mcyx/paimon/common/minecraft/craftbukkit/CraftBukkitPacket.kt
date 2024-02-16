@@ -101,12 +101,26 @@ abstract class CraftBukkitPacket {
          * @param type 获取的类型
          * @return 返回获取到的数据
          */
-        fun getObjectOrNUll(getObject: Any, type: String): Any? {
-            //获取高版本的 NetworkManager
+        fun getObjectName(getObject: Any, type: String): String {
             for (declaredField in getObject.javaClass.declaredFields) {
                 if (declaredField.type.toString().endsWith(type)) {
-                    declaredField.isAccessible = true
-                    return declaredField.get(getObject)
+                    return declaredField.name
+                }
+            }
+            return String()
+        }
+
+        /**
+         * 获取混淆类中的某个类型数据
+         * @param c 哪个类
+         * @param getObject 来源对象
+         * @param type 获取的类型
+         * @return 返回获取到的数据
+         */
+        fun getStaticObject(c: Class<*>, getObject: Any,type: String): Any {
+            for (declaredField in c.declaredFields) {
+                if (declaredField.type.toString().endsWith(type)) {
+                    return c.getDeclaredField(declaredField.name).apply { isAccessible = true }.get(getObject)
                 }
             }
             return Unit
