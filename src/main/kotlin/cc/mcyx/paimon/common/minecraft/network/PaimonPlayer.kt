@@ -119,4 +119,14 @@ class PaimonPlayer(val player: Player) {
                 .newInstance(gid)
         )
     }
+
+    /**
+     * 返回玩家当前所在世界的nms World
+     * @return NMS World
+     */
+    fun getNMSWorld(): Any{
+        CraftBukkitPacket.asBukkitClass("CraftWorld").cast(player.world).also {
+            return it.javaClass.getDeclaredMethod("getHandle").invoke(it)
+        }
+    }
 }
