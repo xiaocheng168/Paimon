@@ -3,6 +3,7 @@ package cc.mcyx.paimon.common.minecraft.network
 import cc.mcyx.paimon.common.PaimonPlugin
 import cc.mcyx.paimon.common.minecraft.craftbukkit.CraftBukkitPacket
 import cc.mcyx.paimon.common.ui.PaimonUI
+import cc.mcyx.paimon.common.ui.Sign
 import io.netty.channel.Channel
 import io.netty.channel.ChannelDuplexHandler
 import io.netty.channel.ChannelHandlerContext
@@ -124,9 +125,18 @@ class PaimonPlayer(val player: Player) {
      * 返回玩家当前所在世界的nms World
      * @return NMS World
      */
-    fun getNMSWorld(): Any{
+    fun getNMSWorld(): Any {
         CraftBukkitPacket.asBukkitClass("CraftWorld").cast(player.world).also {
             return it.javaClass.getDeclaredMethod("getHandle").invoke(it)
         }
+    }
+
+    /**
+     * 打开Sign牌子界面
+     * @param line 行数 最长4行
+     * @return 返回 Sign 对象
+     */
+    fun openSignUI(vararg line: String): Sign {
+        return Sign(player).open(line.toList().toTypedArray())
     }
 }
