@@ -216,6 +216,9 @@ open class PaimonUI(paimonUIType: PaimonUIType, head: String = "空空如也") {
         CHEST_56("minecraft:chest", 56, "GENERIC_9X6", "f"),
         HOPPER("minecraft:hopper", 5, "HOPPER", "p"),
         ANVIL("minecraft:anvil", 2, "ANVIL", "h"),
+        DISPENSER("minecraft:dispenser", 9, "DISPENSER", "g"),
+        FURNACE("minecraft:furnace", 3, "FURNACE", "n"),
+        BREWING_STAND("minecraft:brewing_stand", 4, "BREWING_STAND", "k"),
     }
 
     /**
