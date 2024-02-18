@@ -73,6 +73,7 @@ public class PaimonPlugin extends Paimon {
 
     public static final String ALIYUN_MAVEN = "https://maven.aliyun.com/repository/public/";
     public static final String IRD_MAVEN = "https://nexus.iridiumdevelopment.net/repository/maven-releases/";
+    public static final String CODEMC_MAVEN = "https://repo.codemc.io/repository/maven-public/";
 
     /**
      * 增加依赖
@@ -97,6 +98,7 @@ public class PaimonPlugin extends Paimon {
             addLibURL("org/ktorm/ktorm-core/3.6.0/ktorm-core-3.6.0.jar", ALIYUN_MAVEN);
             addLibURL("com/google/zxing/core/3.3.3/core-3.3.3.jar", ALIYUN_MAVEN);
             addLibURL("com/iridium/IridiumColorAPI/1.0.8/IridiumColorAPI-1.0.8.jar", IRD_MAVEN);
+            addLibURL("de/tr7zw/item-nbt-api-plugin/2.12.2/item-nbt-api-plugin-2.12.2.jar", CODEMC_MAVEN);
 
             //建立所有子文件夹
             if (libFolder.mkdirs()) {
