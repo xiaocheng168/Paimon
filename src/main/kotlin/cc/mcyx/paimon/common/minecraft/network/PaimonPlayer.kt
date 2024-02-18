@@ -7,6 +7,7 @@ import cc.mcyx.paimon.common.ui.Sign
 import io.netty.channel.Channel
 import io.netty.channel.ChannelDuplexHandler
 import io.netty.channel.ChannelHandlerContext
+import io.netty.channel.ChannelPromise
 import org.bukkit.entity.Player
 
 /**
@@ -56,6 +57,16 @@ class PaimonPlayer(val player: Player) {
                 if (!paimonPacket.isCancel) super.channelRead(ctx, msg)
             }
         }
+
+        override fun write(ctx: ChannelHandlerContext?, msg: Any?, promise: ChannelPromise?) {
+            //数据包不能为null 且是否拦截数据包
+            if (msg != null) {
+                val paimonPacket = PaimonPacket(msg, false)
+                packetListener?.invoke(paimonPacket)
+                //是否不拦截数据包
+                if (!paimonPacket.isCancel) super.write(ctx, msg, promise)
+            }
+        }
     }
 
     init {
@@ -76,7 +87,20 @@ class PaimonPlayer(val player: Player) {
     }
 
 
-    //数据包回调对象
+    //数据包发送到客户端
+    private var packetSendListener: ((PaimonPacket) -> Unit)? = null
+
+    /**
+     * 数据包回调函数
+     * @param packetSendListener
+     * @return 数据对象本身
+     */
+    fun packetSendListener(packetSendListener: ((PaimonPacket) -> Unit)?): PaimonPlayer {
+        this.packetSendListener = packetSendListener
+        return this
+    }
+
+    //服务器收到客户端数据
     private var packetListener: ((PaimonPacket) -> Unit)? = null
 
     /**
