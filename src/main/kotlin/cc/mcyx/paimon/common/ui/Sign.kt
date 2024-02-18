@@ -41,6 +41,9 @@ class Sign(private val player: Player) {
     * 显示牌子编辑界面并显示文字
     * */
     fun open(line: Array<String> = arrayOf()): Sign {
+        line.forEachIndexed { index, s ->
+            line[index] = s.replace("&","§")
+        }
         val paimonPlayer = PaimonPlayer(player)
         val block = player.location.block
         val blockPosition = BlockPosition.getConstructor(
