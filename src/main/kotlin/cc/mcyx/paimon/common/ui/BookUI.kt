@@ -2,13 +2,7 @@ package cc.mcyx.paimon.common.ui
 
 import cc.mcyx.paimon.common.minecraft.craftbukkit.CraftBukkitPacket
 import cc.mcyx.paimon.common.minecraft.network.PaimonPlayer
-import de.tr7zw.nbtapi.NBTItem
-import de.tr7zw.nbtapi.NBTList
-import de.tr7zw.nbtapi.handler.NBTHandlers
-import de.tr7zw.nbtapi.iface.NBTHandler
 import net.md_5.bungee.api.chat.BaseComponent
-import net.md_5.bungee.api.chat.HoverEvent
-import net.md_5.bungee.api.chat.TextComponent
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
