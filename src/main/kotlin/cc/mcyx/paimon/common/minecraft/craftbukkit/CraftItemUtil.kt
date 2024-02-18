@@ -20,7 +20,7 @@ class CraftItemUtil {
                 val itemMeta = it.itemMeta
                 itemMeta.displayName = name
                 itemMeta.lore = lore
-                itemStack.itemMeta = itemMeta
+                it.itemMeta = itemMeta
             }
         }
 
