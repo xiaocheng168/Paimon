@@ -40,9 +40,10 @@ open class PaimonUI(paimonUIType: PaimonUIType, head: String = "空空如也") {
     /**
      * 给一个代理玩家打开UI界面
      * @param paimonPlayer 代理玩家
+     * @param isRender 是否渲染 buttons 里的物品
      * @return 返回界面类
      */
-    fun open(paimonPlayer: PaimonPlayer): PaimonUI {
+    fun open(paimonPlayer: PaimonPlayer, isRender: Boolean = true): PaimonUI {
 
         this.paimonPlayer = paimonPlayer
         this.gid = paimonPlayer.nextContainerCounter()
@@ -52,13 +53,13 @@ open class PaimonUI(paimonUIType: PaimonUIType, head: String = "空空如也") {
             CraftBukkitPacket.createGUIPacket(
                 this.gid,
                 this.paimonUIType,
-                this.head.replace("&","§"),
+                this.head.replace("&", "§"),
                 this.paimonUIType.size
             )
         )
         this.isOpen = true
-        //批量发送物品位置包
-        for (value in buttons.values) {
+        //渲染 buttons 里的物品 批量发送物品位置包
+        if (isRender) for (value in buttons.values) {
             sendSetItemPacket(value.slot, value.itemStack)
         }
 
@@ -153,6 +154,7 @@ open class PaimonUI(paimonUIType: PaimonUIType, head: String = "空空如也") {
 
     //关闭界面事件
     private var closeEvent: ((PaimonUI) -> Unit)? = null
+
     //打开界面
     private var openEvent: ((PaimonUI) -> Unit)? = null
 
@@ -182,6 +184,27 @@ open class PaimonUI(paimonUIType: PaimonUIType, head: String = "空空如也") {
         //发送设置物品包
         sendSetItemPacket(slot, itemStack)
         return this
+    }
+
+    /**
+     * 清空界面
+     */
+    fun clear() {
+        for (i in this.paimonUIType.size downTo 0) {
+            sendSetItemPacket(i, ItemStack(Material.AIR))
+        }
+    }
+
+    /**
+     * 添加物品，返回再哪一个
+     */
+    fun addItem(itemStack: ItemStack) {
+        for (i in 0..this.paimonUIType.size) {
+            if (!buttons.containsKey(i)) {
+                setItem(i, itemStack)
+                return
+            }
+        }
     }
 
     /**
