@@ -7,7 +7,6 @@
     <artifactId>Paimon</artifactId>
     <groupId>cc.mcyx</groupId>
     <version>1.0.6.8</version>
-    <packaging>pom</packaging>
 
     <name>consoleApp</name>
 
