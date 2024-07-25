@@ -97,7 +97,7 @@ public class PaimonPlugin extends Paimon {
             addLibURL("org/xerial/sqlite-jdbc/3.43.0.0/sqlite-jdbc-3.43.0.0.jar", ALIYUN_MAVEN);
             addLibURL("org/ktorm/ktorm-core/3.6.0/ktorm-core-3.6.0.jar", ALIYUN_MAVEN);
             addLibURL("com/google/zxing/core/3.3.3/core-3.3.3.jar", ALIYUN_MAVEN);
-            addLibURL("com/iridium/IridiumColorAPI/1.0.8/IridiumColorAPI-1.0.8.jar", IRD_MAVEN);
+            addLibURL("com/iridium/IridiumColorAPI/1.0.89IridiumColorAPI-1.0.9.jar", IRD_MAVEN);
             addLibURL("de/tr7zw/item-nbt-api-plugin/2.12.2/item-nbt-api-plugin-2.12.2.jar", CODEMC_MAVEN);
 
             //建立所有子文件夹
@@ -109,11 +109,17 @@ public class PaimonPlugin extends Paimon {
             for (LibInfo lib : libs) {
                 //检查依赖是否存在且可用
                 if (!lib.check()) {
-                    //下载依赖包
-                    downloadJar(new URL(lib.getUrl()));
-                    downloadJar(new URL(lib.getUrl() + ".md5"));
-                    //日志提示
-                    System.out.println("[Paimon] Downloading " + lib.url);
+
+                    try {
+                        //下载依赖包
+                        downloadJar(new URL(lib.getUrl()));
+                        downloadJar(new URL(lib.getUrl() + ".md5"));
+                        //日志提示
+                        System.out.println("[Paimon] Downloading " + lib.url);
+                    } catch (Exception e) {
+                        System.err.println("[Paimon] Downloading Error " + lib.url);
+                    }
+
                 }
             }
 
