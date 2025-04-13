@@ -6,7 +6,7 @@
 
     <artifactId>Paimon</artifactId>
     <groupId>cc.mcyx</groupId>
-    <version>1.0.6.8</version>
+    <version>1.0.6.9</version>
 
     <name>consoleApp</name>
 
@@ -183,12 +183,12 @@
             <version>2.12.2</version>
             <scope>provided</scope>
         </dependency>
-        <dependency>
-            <groupId>com.velocitypowered</groupId>
-            <artifactId>velocity-api</artifactId>
-            <version>3.3.0-SNAPSHOT</version>
-            <scope>provided</scope>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>com.velocitypowered</groupId>-->
+<!--            <artifactId>velocity-api</artifactId>-->
+<!--            <version>3.3.0-SNAPSHOT</version>-->
+<!--            <scope>provided</scope>-->
+<!--        </dependency>-->
     </dependencies>
 
 </project>

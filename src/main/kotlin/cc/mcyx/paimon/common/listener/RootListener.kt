@@ -11,6 +11,10 @@ class RootListener : PaimonAutoListener {
         ignoreCancelled = true
     )
     fun joinEvent(e: PlayerJoinEvent) {
-        PaimonPlayerManager.addPaimonPlayer(e.player)
+        try {
+            PaimonPlayerManager.addPaimonPlayer(e.player)
+        } catch (_: Throwable) {
+
+        }
     }
 }
